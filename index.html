@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0048)file:///C:/Users/Usuario/Downloads/index_18.html -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Asociación de familiares del CPRPM Naranco</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="stylesheet" href="./index_files/css2">
+<script src="./index_files/supabase-js@2"></script>
 <style>
   :root{
     --teal-900:#1E3634; --teal-700:#2B4A47; --teal-600:#365E5A; --teal-100:#E4EEEC;
@@ -77,4 +77,1033 @@
   .modal{ background:#fff; border-radius:12px; padding:24px; max-width:520px; width:100%; max-height:88vh; overflow-y:auto; }
   .modal-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }
   .empty{ color:var(--ink-soft); font-style:italic; padding:20px; text-align:center; }
-  .toast{
+  .toast{ position:fixed; bottom:20px; right:20px; background:var(--teal-900); color:#fff; padding:11px 18px; border-radius:8px; font-size:13.5px; box-shadow:var(--shadow); z-index:100; opacity:0; transform:translateY(10px); transition:.25s; }
+  .toast.show{ opacity:1; transform:translateY(0); }
+  .muted{ color:var(--ink-soft); font-size:13px; }
+  .checkbox-row{ display:flex; align-items:center; gap:8px; }
+  .checkbox-row input{ width:auto; }
+
+  /* Login */
+  #loginScreen{ min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--teal-900); }
+  .login-card{ background:var(--cream); border-radius:14px; padding:36px 32px; width:100%; max-width:380px; box-shadow:0 10px 40px rgba(0,0,0,.3); }
+  .login-card .leaf{ width:48px; height:48px; border-radius:50%; background:var(--gold-500); display:flex; align-items:center; justify-content:center; color:var(--teal-900); font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0 auto 14px; }
+  .login-card h1{ font-size:19px; text-align:center; margin-bottom:6px; }
+  .login-card p.sub{ text-align:center; color:var(--ink-soft); font-size:13.5px; margin-bottom:24px; }
+  .login-error{ background:var(--brick-100); color:var(--brick); padding:10px 12px; border-radius:7px; font-size:13px; margin-bottom:14px; display:none; }
+  .login-card button.btn{ width:100%; padding:11px; margin-top:6px; }
+  #configWarning{ display:none; background:var(--brick-100); color:var(--brick); padding:12px; border-radius:8px; font-size:13px; margin-bottom:16px; }
+</style>
+</head>
+<body>
+
+<!-- ===== PANTALLA DE LOGIN ===== -->
+<div id="loginScreen" style="display: none;">
+  <div class="login-card">
+    <div class="leaf">A</div>
+    <h1>Asociación de familiares del CPRPM Naranco</h1>
+    <p class="sub">Zona privada de la Junta Directiva</p>
+    <div id="configWarning">⚠️ Falta configurar la conexión a Supabase. Edita <code>config.js</code> con tu URL y clave "anon".</div>
+    <div class="login-error" id="loginError"></div>
+    <div class="field"><label>Email</label><input type="email" id="loginEmail" autocomplete="username"></div>
+    <div class="field"><label>Contraseña</label><input type="password" id="loginPassword" autocomplete="current-password"></div>
+    <button class="btn" id="loginBtn" onclick="hacerLogin()">Entrar</button>
+    <p class="muted" style="text-align:center; margin-top:16px;">¿No tienes cuenta? Pide a quien administre la aplicación que te dé de alta desde el panel de Supabase.</p>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="app" id="appRoot" style="display: block;">
+  <header class="top">
+    <div class="brand">
+      <div class="leaf">A</div>
+      <div>
+        <h1 id="assocName">Asociación de familiares del CPRPM Naranco</h1>
+        <div class="sub">Gestión de socios, cuotas, incidencias y gastos</div>
+      </div>
+    </div>
+    <div class="userbox">
+      <span id="userEmail">nacholopezquince@gmail.com</span>
+      <button class="btn secondary" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="socios" class="active">Socios</button>
+    <button data-tab="cuotas">Cuotas</button>
+    <button data-tab="incidencias">Incidencias</button>
+    <button disabled="" title="Próximamente en la siguiente fase">Actas</button>
+    <button disabled="" title="Próximamente en la siguiente fase">Convocatorias</button>
+    <button disabled="" title="Próximamente en la siguiente fase">Gastos</button>
+  </nav>
+
+  <main>
+    <section class="panel active" id="tab-socios">
+      <div class="section-title">
+        <h2>Socios</h2>
+        <button class="btn" onclick="openSocioForm()">+ Nuevo socio</button>
+      </div>
+      <div class="toolbar" style="margin-bottom:14px;">
+        <input type="text" id="socioSearch" placeholder="Buscar por nombre, residente o teléfono..." style="max-width:320px;">
+      </div>
+      <div class="card"><div class="tablewrap"><table id="tableSocios">
+        <thead><tr><th>ID</th><th>Familiar</th><th>Junta</th><th>NIF</th><th>Teléfono</th><th>Residente</th><th>Planta</th><th>Cuota</th><th>LPD</th><th>Email</th><th></th></tr></thead>
+        <tbody>
+    <tr>
+      <td>1</td>
+      <td>Eduardo Fuente del Río</td>
+      <td><span class="muted">—</span></td>
+      <td>10560814L</td>
+      <td>669343435</td>
+      <td>PAQUITA</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;44bc8f65-53f5-4adf-a5fd-6c6d99e8c516&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;44bc8f65-53f5-4adf-a5fd-6c6d99e8c516&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>2</td>
+      <td>Julia Fernández Díaz</td>
+      <td><span class="muted">—</span></td>
+      <td>10557148X</td>
+      <td>629591166</td>
+      <td>COVADONGA</td>
+      <td>2</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;b055de25-2c85-4ab2-a91e-303caa0b0a38&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;b055de25-2c85-4ab2-a91e-303caa0b0a38&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>3</td>
+      <td>Esperanza Alonso Suárez</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>673462806</td>
+      <td>ALICIA</td>
+      <td>2</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;f56a8110-a8d1-4573-90b7-adde76e04018&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;f56a8110-a8d1-4573-90b7-adde76e04018&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>4</td>
+      <td>María Fe Suárez González</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>692191188</td>
+      <td>FINA</td>
+      <td>1</td>
+      <td><span class="pill no">No</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;ee3f8079-f5cf-46ce-89b2-5c06ac1d7a54&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;ee3f8079-f5cf-46ce-89b2-5c06ac1d7a54&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>5</td>
+      <td>María Rosa Moya Aranzubía</td>
+      <td><span class="muted">—</span></td>
+      <td>13143001L</td>
+      <td>669117976</td>
+      <td>OLGA</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;68b8c8ab-cf8d-4bc3-9cd1-0212e90fd2a3&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;68b8c8ab-cf8d-4bc3-9cd1-0212e90fd2a3&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>6</td>
+      <td>Fernando Muñiz Heras</td>
+      <td><span class="muted">—</span></td>
+      <td>09395610H</td>
+      <td>649961637</td>
+      <td>TERESA</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;fa0af324-40e2-4669-bc5e-1171dd29416d&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;fa0af324-40e2-4669-bc5e-1171dd29416d&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>7</td>
+      <td>Mercedes Suárez Urdangaray</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>638808247</td>
+      <td>MERCEDES</td>
+      <td>-1</td>
+      <td><span class="pill no">No</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;6d94babf-6b9c-4fec-ae17-1cc203f5d306&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;6d94babf-6b9c-4fec-ae17-1cc203f5d306&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>8</td>
+      <td>Roberto Cuesta Álvarez</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>655862035</td>
+      <td>CHITA</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill no">Falta</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;549adb59-80ea-4c62-87ed-77fa4d0e75b8&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;549adb59-80ea-4c62-87ed-77fa4d0e75b8&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>9</td>
+      <td>Berta Argüelles Alonso</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>636269741</td>
+      <td>BERTA</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;788be524-deb0-423a-8e9b-003435cede87&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;788be524-deb0-423a-8e9b-003435cede87&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>10</td>
+      <td>José A. Gil Martín</td>
+      <td><span class="muted">—</span></td>
+      <td>10567109N</td>
+      <td>629548231</td>
+      <td>CARLOS</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;cce781b4-7043-4899-b17f-6fb96770a4b1&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;cce781b4-7043-4899-b17f-6fb96770a4b1&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>11</td>
+      <td>Mª Victoria Fernández Díaz</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>619081932</td>
+      <td>VIOLETA</td>
+      <td>2</td>
+      <td><span class="pill no">No</span></td>
+      <td><span class="pill no">Falta</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;206e8e07-7646-449e-9830-db9e1591d7f2&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;206e8e07-7646-449e-9830-db9e1591d7f2&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>12</td>
+      <td>Susana Fernández Guisasola</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>679255457</td>
+      <td>ELOISA</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;6bb1e81c-6e98-4217-a7b0-921ce76f483c&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;6bb1e81c-6e98-4217-a7b0-921ce76f483c&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>13</td>
+      <td>Mª Carmen Fernández González</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>678336234</td>
+      <td>MARSI</td>
+      <td>1</td>
+      <td><span class="pill no">No</span></td>
+      <td><span class="pill no">Falta</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;81951f4e-3d95-4798-bf5f-9e492f0d9d23&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;81951f4e-3d95-4798-bf5f-9e492f0d9d23&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>14</td>
+      <td>Margarita Santos Ferrera</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>660044455</td>
+      <td>MARGARITA</td>
+      <td>0</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill no">Falta</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;68c44180-6465-46a2-9c04-ae712200e764&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;68c44180-6465-46a2-9c04-ae712200e764&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>15</td>
+      <td>Isabel García Alonso</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>679239843</td>
+      <td>SOLEDAD</td>
+      <td>2</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;de6ee2fa-a43e-433a-bcf7-95c0e7024639&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;de6ee2fa-a43e-433a-bcf7-95c0e7024639&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>16</td>
+      <td>Susana Cuesta Suárez</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>636350710</td>
+      <td>CARMEN ESTHER</td>
+      <td>2</td>
+      <td><span class="pill no">No</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;7ce61a0d-aef1-4e28-9ab2-c32d098bc3fa&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;7ce61a0d-aef1-4e28-9ab2-c32d098bc3fa&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>17</td>
+      <td>Julia Menéndez García</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>620451851</td>
+      <td>ANTONIO</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;4c1cc62c-cd7b-4ec0-aa46-0610e1d0d875&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;4c1cc62c-cd7b-4ec0-aa46-0610e1d0d875&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>18</td>
+      <td>Lola de la Rosa Fernández</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>696666332</td>
+      <td>CÁNDIDA RAQUEL</td>
+      <td>2</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;f4fb63cd-1e5a-4756-b9b5-ca547ba63fe2&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;f4fb63cd-1e5a-4756-b9b5-ca547ba63fe2&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>19</td>
+      <td>David Mérida Fernández</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>626941423</td>
+      <td>JOSÉ MÉRIDA</td>
+      <td>0</td>
+      <td><span class="pill no">No</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;316daf8d-7f8f-45f8-9c2e-737505726b3a&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;316daf8d-7f8f-45f8-9c2e-737505726b3a&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>20</td>
+      <td>Mª Teresa Ríos Argüelles</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>677606114</td>
+      <td>TERESA</td>
+      <td>0</td>
+      <td><span class="pill no">No</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;5ffd7f4c-5005-45ba-9b8e-cd46dd924095&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;5ffd7f4c-5005-45ba-9b8e-cd46dd924095&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>21</td>
+      <td>Vicky Parada Arroyo</td>
+      <td><span class="muted">—</span></td>
+      <td>53136980B</td>
+      <td>667351390</td>
+      <td>JUSTY</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;3cb0e4d4-2e5b-4bbd-b54a-0038629e4958&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;3cb0e4d4-2e5b-4bbd-b54a-0038629e4958&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>22</td>
+      <td>Marlen Valledor Nieto</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>666765543</td>
+      <td>ELENA NIETO</td>
+      <td>1</td>
+      <td><span class="pill no">No</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;6c43fbbb-2448-4c36-a6cb-b49b594aea4a&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;6c43fbbb-2448-4c36-a6cb-b49b594aea4a&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>23</td>
+      <td>Nicolás Antonio Crespo Otero</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>687810633</td>
+      <td>TERESA OTERO</td>
+      <td>2</td>
+      <td><span class="pill no">No</span></td>
+      <td><span class="pill no">Falta</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;7d01d5bd-82cb-4c85-b499-68d71063d80b&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;7d01d5bd-82cb-4c85-b499-68d71063d80b&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>24</td>
+      <td>Celia Fernández González</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>691581189</td>
+      <td>CELIA CASTAÑÓN</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;bebde128-3fee-487f-ad2e-c6b409129430&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;bebde128-3fee-487f-ad2e-c6b409129430&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>25</td>
+      <td>Marta C. Fernández González</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>658031560</td>
+      <td>FLOR</td>
+      <td>0</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill no">Falta</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;cb313e4f-f177-439e-b3ec-a347e78a9b14&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;cb313e4f-f177-439e-b3ec-a347e78a9b14&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>26</td>
+      <td>Luis Ignacio López Quince</td>
+      <td><span class="muted">—</span></td>
+      <td>09439116P</td>
+      <td>600605600</td>
+      <td>ROSARIO</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;e7c4324c-66f0-4657-98eb-9d8669d490d1&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;e7c4324c-66f0-4657-98eb-9d8669d490d1&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>27</td>
+      <td>Dulce Mª Pérez Acebo</td>
+      <td><span class="muted">—</span></td>
+      <td>09363510A</td>
+      <td>677791578</td>
+      <td>LUCIO LUIS</td>
+      <td>0</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;cbd84c1d-3dfe-4f29-a972-40bd5d979d90&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;cbd84c1d-3dfe-4f29-a972-40bd5d979d90&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>28</td>
+      <td>Fernando Penin Cordevi</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>635786467</td>
+      <td>AVELINA</td>
+      <td>2</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;a8059c16-9191-499d-8e92-bb6621f76545&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;a8059c16-9191-499d-8e92-bb6621f76545&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>29</td>
+      <td>Mari Fé Suárez González</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>692191188</td>
+      <td>JOSEFA GONZÁLEZ</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill no">Falta</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;2a32cad4-6596-48cb-8370-cec91d4e6513&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;2a32cad4-6596-48cb-8370-cec91d4e6513&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>30</td>
+      <td>Pilar Menéndez Villar</td>
+      <td><span class="muted">—</span></td>
+      <td>002601455</td>
+      <td>691075522</td>
+      <td>MERCEDES</td>
+      <td>2</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;8cfd2fa2-5247-4d8c-8c07-39548228ddca&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;8cfd2fa2-5247-4d8c-8c07-39548228ddca&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>31</td>
+      <td>Alberto García Suárez</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>659629262 / 985241479</td>
+      <td>ALBERTO</td>
+      <td>2</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;545c9e8f-1c40-4fc0-bdd1-6de0a2c7563a&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;545c9e8f-1c40-4fc0-bdd1-6de0a2c7563a&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>32</td>
+      <td>Laura Jubete Pérez</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>676088887</td>
+      <td>JULIA</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill si">Firmado</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;96d2a867-3b26-4638-a0b5-92650d8a4ec6&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;96d2a867-3b26-4638-a0b5-92650d8a4ec6&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>33</td>
+      <td>Manuel García Viejo</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>660557340</td>
+      <td>PURIFICACIÓN</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill no">Falta</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;aa0ddfd6-1bdb-4b8e-9a32-c7153fc1e8fb&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;aa0ddfd6-1bdb-4b8e-9a32-c7153fc1e8fb&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>34</td>
+      <td>David Merida Fernández</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>626941423</td>
+      <td>JOSÉ MERIDA</td>
+      <td>0</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill no">Falta</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;0d5c419b-9ec0-4fbc-b185-31213f3d91f9&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;0d5c419b-9ec0-4fbc-b185-31213f3d91f9&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  
+    <tr>
+      <td>35</td>
+      <td>Celio Fernández González</td>
+      <td><span class="muted">—</span></td>
+      <td>—</td>
+      <td>691458118</td>
+      <td>CELIO CASTAÑÓN</td>
+      <td>1</td>
+      <td><span class="pill si">Sí</span></td>
+      <td><span class="pill no">Falta</span></td>
+      <td>—</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm(&#39;a12d5409-1c43-4dd9-bd47-1e5bfa2ddc6c&#39;)">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio(&#39;a12d5409-1c43-4dd9-bd47-1e5bfa2ddc6c&#39;)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+      </table></div></div>
+    </section>
+
+    <section class="panel" id="tab-cuotas">
+      <div class="section-title">
+        <h2>Cuotas mensuales</h2>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span id="cuotaMesLabel" class="muted" style="min-width:140px;"></span>
+          <button class="btn secondary" onclick="cambiarMes(-1)">← Mes anterior</button>
+          <button class="btn secondary" onclick="cambiarMes(1)">Mes siguiente →</button>
+        </div>
+      </div>
+      <div class="cards" id="cuotasResumen" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px;"></div>
+      <div class="card"><div class="tablewrap"><table id="tableCuotas">
+        <thead><tr><th>ID</th><th>Familiar</th><th>Residente</th><th>Importe (€)</th><th>Estado</th><th>Método</th><th>Fecha pago</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div></div>
+    </section>
+
+    <section class="panel" id="tab-incidencias">
+      <div class="section-title">
+        <h2>Incidencias y reuniones</h2>
+        <button class="btn" onclick="openIncidenciaForm()">+ Nueva entrada</button>
+      </div>
+      <div class="card"><div class="tablewrap"><table id="tableIncidencias">
+        <thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>Residente</th><th>Responsable</th><th>Estado</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div></div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modalContent"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="./index_files/config.js"></script>
+<script>
+let db = null;
+let socios = [];
+
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function escapeAttr(v){ return escapeHtml(v||''); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+// ---------- ARRANQUE ----------
+window.addEventListener('DOMContentLoaded', async ()=>{
+  if(typeof SUPABASE_URL==='undefined' || SUPABASE_URL.includes('TU-PROYECTO')){
+    document.getElementById('configWarning').style.display='block';
+    return;
+  }
+  db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const { data:{ session } } = await db.auth.getSession();
+  if(session) mostrarApp(session);
+
+  db.auth.onAuthStateChange((event, session)=>{
+    if(session) mostrarApp(session);
+    else mostrarLogin();
+  });
+});
+
+async function hacerLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+  errBox.style.display='none';
+  if(!email || !password){ errBox.textContent='Rellena email y contraseña.'; errBox.style.display='block'; return; }
+  document.getElementById('loginBtn').disabled = true;
+  const { error } = await db.auth.signInWithPassword({ email, password });
+  document.getElementById('loginBtn').disabled = false;
+  if(error){ errBox.textContent = 'No hemos podido iniciar sesión: revisa el email y la contraseña.'; errBox.style.display='block'; }
+}
+async function cerrarSesion(){
+  await db.auth.signOut();
+}
+function mostrarLogin(){
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('appRoot').style.display='none';
+}
+async function mostrarApp(session){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appRoot').style.display='block';
+  document.getElementById('userEmail').textContent = session.user.email;
+  await cargarAjustes();
+  await cargarSocios();
+}
+
+// ---------- TABS (preparado para futuras pestañas) ----------
+document.querySelectorAll('nav.tabs button[data-tab]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button[data-tab]').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='cuotas') cargarCuotas();
+    if(btn.dataset.tab==='incidencias') cargarIncidencias();
+  });
+});
+
+// ---------- SOCIOS ----------
+async function cargarSocios(){
+  const { data, error } = await db.from('socios').select('*').order('numero_socio');
+  if(error){ showToast('Error cargando socios: '+error.message); return; }
+  socios = data;
+  renderSocios();
+}
+function renderSocios(){
+  const q = (document.getElementById('socioSearch').value||'').toLowerCase();
+  const rows = socios.filter(s=>!q || (s.nombre+s.residente+s.tel1+s.tel2).toLowerCase().includes(q));
+  const body = document.querySelector('#tableSocios tbody');
+  body.innerHTML = rows.length ? rows.map(s=>`
+    <tr>
+      <td>${s.numero_socio||'—'}</td>
+      <td>${escapeHtml(s.nombre)}</td>
+      <td>${s.cargo?`<span class="pill si">${escapeHtml(s.cargo)}</span>`:'<span class="muted">—</span>'}</td>
+      <td>${escapeHtml(s.nif)||'—'}</td>
+      <td>${escapeHtml(s.tel1)||'—'}${s.tel2?' / '+escapeHtml(s.tel2):''}</td>
+      <td>${escapeHtml(s.residente)}</td>
+      <td>${escapeHtml(s.planta)}</td>
+      <td>${s.paga_cuota?'<span class="pill si">Sí</span>':'<span class="pill no">No</span>'}</td>
+      <td>${s.lpd?'<span class="pill si">Firmado</span>':'<span class="pill no">Falta</span>'}</td>
+      <td>${escapeHtml(s.email)||'—'}</td>
+      <td>
+        <button class="icon-btn" onclick="openSocioForm('${s.id}')">Editar</button>
+        <button class="icon-btn" onclick="deleteSocio('${s.id}')">Eliminar</button>
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="11" class="empty">No se han encontrado socios.</td></tr>`;
+}
+document.getElementById('socioSearch').addEventListener('input', renderSocios);
+
+function openSocioForm(id){
+  const s = id ? socios.find(x=>x.id===id) : null;
+  document.getElementById('modalContent').innerHTML = `
+    <h3>${s?'Editar socio':'Nuevo socio'}</h3>
+    <div class="grid2">
+      <div class="field"><label>Nombre del familiar</label><input type="text" id="f_nombre" value="${escapeAttr(s?.nombre)}"></div>
+      <div class="field"><label>NIF</label><input type="text" id="f_nif" value="${escapeAttr(s?.nif)}"></div>
+      <div class="field"><label>Teléfono principal</label><input type="text" id="f_tel1" value="${escapeAttr(s?.tel1)}"></div>
+      <div class="field"><label>Teléfono secundario</label><input type="text" id="f_tel2" value="${escapeAttr(s?.tel2)}"></div>
+      <div class="field"><label>Nombre del residente</label><input type="text" id="f_residente" value="${escapeAttr(s?.residente)}"></div>
+      <div class="field"><label>Planta / ubicación</label><input type="text" id="f_planta" value="${escapeAttr(s?.planta)}"></div>
+      <div class="field"><label>Email</label><input type="email" id="f_email" value="${escapeAttr(s?.email)}"></div>
+      <div class="field"><label>Cargo en la Junta Directiva</label><select id="f_cargo">
+        <option value="" ${!s?.cargo?'selected':''}>No forma parte (socio)</option>
+        <option value="Presidente/a" ${s?.cargo==='Presidente/a'?'selected':''}>Presidente/a</option>
+        <option value="Vicepresidente/a" ${s?.cargo==='Vicepresidente/a'?'selected':''}>Vicepresidente/a</option>
+        <option value="Secretario/a" ${s?.cargo==='Secretario/a'?'selected':''}>Secretario/a</option>
+        <option value="Tesorero/a" ${s?.cargo==='Tesorero/a'?'selected':''}>Tesorero/a</option>
+        <option value="Vocal" ${s?.cargo==='Vocal'?'selected':''}>Vocal</option>
+      </select></div>
+    </div>
+    <div class="field checkbox-row"><input type="checkbox" id="f_pagaCuota" ${s?.paga_cuota!==false?'checked':''}><label style="margin:0;">Paga cuota mensual</label></div>
+    <div class="field checkbox-row"><input type="checkbox" id="f_lpd" ${s?.lpd?'checked':''}><label style="margin:0;">Ha firmado consentimiento LPD</label></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn" onclick="saveSocio('${s?s.id:''}')">Guardar</button>
+    </div>
+  `;
+  openModal();
+}
+async function saveSocio(id){
+  const data = {
+    nombre: document.getElementById('f_nombre').value.trim(),
+    nif: document.getElementById('f_nif').value.trim(),
+    tel1: document.getElementById('f_tel1').value.trim(),
+    tel2: document.getElementById('f_tel2').value.trim(),
+    residente: document.getElementById('f_residente').value.trim(),
+    planta: document.getElementById('f_planta').value.trim(),
+    email: document.getElementById('f_email').value.trim(),
+    cargo: document.getElementById('f_cargo').value,
+    paga_cuota: document.getElementById('f_pagaCuota').checked,
+    lpd: document.getElementById('f_lpd').checked
+  };
+  if(!data.nombre){ showToast('Indica el nombre del familiar.'); return; }
+  let error;
+  if(id){ ({ error } = await db.from('socios').update(data).eq('id', id)); }
+  else { ({ error } = await db.from('socios').insert(data)); }
+  if(error){ showToast('Error al guardar: '+error.message); return; }
+  closeModal();
+  await cargarSocios();
+  showToast('Socio guardado.');
+}
+async function deleteSocio(id){
+  if(!confirm('¿Eliminar este socio? Esta acción no se puede deshacer.')) return;
+  const { error } = await db.from('socios').delete().eq('id', id);
+  if(error){ showToast('Error al eliminar: '+error.message); return; }
+  await cargarSocios();
+  showToast('Socio eliminado.');
+}
+
+// ---------- CUOTAS ----------
+let mesActual = new Date();
+let cuotaDefecto = 10;
+function mesKey(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
+function mesLabel(d){ return d.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase()); }
+function euros(n){ return (Math.round((n||0)*100)/100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+async function cargarAjustes(){
+  const { data } = await db.from('ajustes').select('*').eq('id',1).single();
+  if(data) cuotaDefecto = data.cuota_defecto || 10;
+}
+function cambiarMes(delta){
+  mesActual.setMonth(mesActual.getMonth()+delta);
+  cargarCuotas();
+}
+async function ensureCuotasMes(){
+  const key = mesKey(mesActual);
+  const pagan = socios.filter(s=>s.paga_cuota);
+  if(!pagan.length) return;
+  const filas = pagan.map(s=>({ socio_id:s.id, mes_key:key, importe:cuotaDefecto, estado:'Pendiente' }));
+  await db.from('cuotas').upsert(filas, { onConflict:'socio_id,mes_key', ignoreDuplicates:true });
+}
+async function cargarCuotas(){
+  document.getElementById('cuotaMesLabel').textContent = mesLabel(mesActual);
+  await ensureCuotasMes();
+  const key = mesKey(mesActual);
+  const { data, error } = await db.from('cuotas')
+    .select('*, socios(id, numero_socio, nombre, residente, tel1)')
+    .eq('mes_key', key);
+  if(error){ showToast('Error cargando cuotas: '+error.message); return; }
+  const rows = (data||[]).filter(c=>c.socios).sort((a,b)=>(a.socios.numero_socio||0)-(b.socios.numero_socio||0));
+  renderCuotas(rows);
+}
+function renderCuotas(rows){
+  const pagadas = rows.filter(c=>c.estado==='Pagado');
+  const pendientes = rows.filter(c=>c.estado==='Pendiente');
+  const total = pagadas.reduce((a,c)=>a+Number(c.importe||0),0);
+  document.getElementById('cuotasResumen').innerHTML = `
+    <div class="metric ok"><div class="label">Pagadas</div><div class="value">${pagadas.length}</div></div>
+    <div class="metric warn"><div class="label">Pendientes</div><div class="value">${pendientes.length}</div></div>
+    <div class="metric"><div class="label">Recaudado este mes</div><div class="value">${euros(total)} €</div></div>
+  `;
+  const body = document.querySelector('#tableCuotas tbody');
+  body.innerHTML = rows.length ? rows.map(c=>`
+    <tr>
+      <td>${c.socios.numero_socio||'—'}</td>
+      <td>${escapeHtml(c.socios.nombre)}</td>
+      <td>${escapeHtml(c.socios.residente)}</td>
+      <td><input type="text" style="width:80px" value="${c.importe}" onchange="updateCuota('${c.id}',{importe:parseFloat(this.value)||0})"></td>
+      <td>
+        <select onchange="updateCuota('${c.id}',{estado:this.value})">
+          <option value="Pendiente" ${c.estado==='Pendiente'?'selected':''}>Pendiente</option>
+          <option value="Pagado" ${c.estado==='Pagado'?'selected':''}>Pagado</option>
+          <option value="Exento" ${c.estado==='Exento'?'selected':''}>Exento</option>
+        </select>
+      </td>
+      <td>
+        <select onchange="updateCuota('${c.id}',{metodo:this.value})">
+          <option value="" ${!c.metodo?'selected':''}>—</option>
+          <option value="Efectivo" ${c.metodo==='Efectivo'?'selected':''}>Efectivo</option>
+          <option value="Transferencia" ${c.metodo==='Transferencia'?'selected':''}>Transferencia</option>
+          <option value="Domiciliación" ${c.metodo==='Domiciliación'?'selected':''}>Domiciliación</option>
+        </select>
+      </td>
+      <td><input type="text" placeholder="AAAA-MM-DD" style="width:110px" value="${c.fecha_pago||''}" onchange="updateCuota('${c.id}',{fecha_pago:this.value||null})"></td>
+      <td>${c.estado==='Pendiente' && c.socios.tel1 ? `<button class="icon-btn" onclick="reclamarWA('${escapeAttr(c.socios.tel1)}','${escapeAttr(c.socios.nombre)}',${c.importe})">WhatsApp</button>` : ''}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">No hay cuotas este mes.</td></tr>`;
+}
+async function updateCuota(id, patch){
+  const { error } = await db.from('cuotas').update(patch).eq('id', id);
+  if(error){ showToast('Error al guardar: '+error.message); return; }
+  await cargarCuotas();
+}
+function reclamarWA(tel, nombre, importe){
+  const num = tel.replace(/\D/g,'');
+  const msg = encodeURIComponent(`Hola ${nombre}, te escribimos de Asociación de familiares del CPRPM Naranco para recordarte el pago de la cuota de ${mesLabel(mesActual)} (${euros(importe)} €). ¡Gracias!`);
+  window.open(`https://wa.me/34${num}?text=${msg}`, '_blank');
+}
+
+// ---------- INCIDENCIAS Y REUNIONES ----------
+let incidencias = [];
+function pillEstado(estado){
+  const map={ 'Abierta':'no','En curso':'no','Cerrada':'si' };
+  return `<span class="pill ${map[estado]||''}">${estado}</span>`;
+}
+async function cargarIncidencias(){
+  const { data, error } = await db.from('incidencias').select('*').order('fecha', {ascending:false});
+  if(error){ showToast('Error cargando incidencias: '+error.message); return; }
+  incidencias = data;
+  renderIncidencias();
+}
+function renderIncidencias(){
+  const body = document.querySelector('#tableIncidencias tbody');
+  body.innerHTML = incidencias.length ? incidencias.map(i=>`
+    <tr>
+      <td>${i.fecha}</td><td>${i.tipo}</td><td>${escapeHtml(i.descripcion)}</td>
+      <td>${escapeHtml(i.residente)||'—'}</td><td>${escapeHtml(i.responsable)||'—'}</td>
+      <td>${pillEstado(i.estado)}</td>
+      <td>
+        <button class="icon-btn" onclick="openIncidenciaForm('${i.id}')">Editar</button>
+        <button class="icon-btn" onclick="deleteIncidencia('${i.id}')">Eliminar</button>
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">No hay entradas registradas.</td></tr>`;
+}
+function openIncidenciaForm(id){
+  const i = id ? incidencias.find(x=>x.id===id) : null;
+  const residenteOptions = [...new Set(socios.map(s=>s.residente).filter(Boolean))].sort();
+  document.getElementById('modalContent').innerHTML = `
+    <h3>${i?'Editar entrada':'Nueva incidencia o reunión'}</h3>
+    <div class="grid2">
+      <div class="field"><label>Fecha</label><input type="date" id="f_fecha" value="${i?.fecha||new Date().toISOString().slice(0,10)}"></div>
+      <div class="field"><label>Tipo</label><select id="f_tipo">
+        <option value="Incidencia" ${i?.tipo==='Incidencia'?'selected':''}>Incidencia</option>
+        <option value="Reunión" ${i?.tipo==='Reunión'?'selected':''}>Reunión</option>
+        <option value="Aviso" ${i?.tipo==='Aviso'?'selected':''}>Aviso</option>
+      </select></div>
+    </div>
+    <div class="field"><label>Descripción</label><input type="text" id="f_descripcion" value="${escapeAttr(i?.descripcion)}"></div>
+    <div class="grid2">
+      <div class="field"><label>Residente afectado (opcional)</label>
+        <input type="text" id="f_residente" list="listaResidentes" value="${escapeAttr(i?.residente)}">
+        <datalist id="listaResidentes">${residenteOptions.map(r=>`<option value="${escapeAttr(r)}">`).join('')}</datalist>
+      </div>
+      <div class="field"><label>Responsable</label><input type="text" id="f_responsable" value="${escapeAttr(i?.responsable)}"></div>
+    </div>
+    <div class="field"><label>Estado</label><select id="f_estado">
+      <option value="Abierta" ${i?.estado==='Abierta'?'selected':''}>Abierta</option>
+      <option value="En curso" ${i?.estado==='En curso'?'selected':''}>En curso</option>
+      <option value="Cerrada" ${i?.estado==='Cerrada'?'selected':''}>Cerrada</option>
+    </select></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn" onclick="saveIncidencia('${i?i.id:''}')">Guardar</button>
+    </div>
+  `;
+  openModal();
+}
+async function saveIncidencia(id){
+  const data = {
+    fecha: document.getElementById('f_fecha').value,
+    tipo: document.getElementById('f_tipo').value,
+    descripcion: document.getElementById('f_descripcion').value.trim(),
+    residente: document.getElementById('f_residente').value.trim(),
+    responsable: document.getElementById('f_responsable').value.trim(),
+    estado: document.getElementById('f_estado').value
+  };
+  if(!data.fecha || !data.descripcion){ showToast('Indica al menos la fecha y la descripción.'); return; }
+  let error;
+  if(id){ ({ error } = await db.from('incidencias').update(data).eq('id', id)); }
+  else { ({ error } = await db.from('incidencias').insert(data)); }
+  if(error){ showToast('Error al guardar: '+error.message); return; }
+  closeModal();
+  await cargarIncidencias();
+  showToast('Guardado.');
+}
+async function deleteIncidencia(id){
+  if(!confirm('¿Eliminar esta entrada?')) return;
+  const { error } = await db.from('incidencias').delete().eq('id', id);
+  if(error){ showToast('Error al eliminar: '+error.message); return; }
+  await cargarIncidencias();
+  showToast('Entrada eliminada.');
+}
+
+// ---------- MODAL ----------
+function openModal(){ document.getElementById('modalBg').classList.add('open'); }
+function closeModal(){ document.getElementById('modalBg').classList.remove('open'); }
+document.getElementById('modalBg').addEventListener('click', e=>{ if(e.target.id==='modalBg') closeModal(); });
+</script>
+
+
+</body></html>
