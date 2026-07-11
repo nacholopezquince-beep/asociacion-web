@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0048)file:///C:/Users/Usuario/Downloads/index_18.html -->
+<!-- saved from url=(0048)file:///C:/Users/Usuario/Downloads/index_19.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -92,6 +92,22 @@
   .login-error{ background:var(--brick-100); color:var(--brick); padding:10px 12px; border-radius:7px; font-size:13px; margin-bottom:14px; display:none; }
   .login-card button.btn{ width:100%; padding:11px; margin-top:6px; }
   #configWarning{ display:none; background:var(--brick-100); color:var(--brick); padding:12px; border-radius:8px; font-size:13px; margin-bottom:16px; }
+
+  .asist-btn{ border:none; border-radius:20px; padding:5px 14px; font-size:12.5px; font-weight:600; cursor:pointer; }
+  .asist-btn.ausente{ background:var(--card); color:var(--ink-soft); border:1px solid var(--line); }
+  .asist-btn.presente{ background:var(--green-ok-bg); color:var(--green-ok); }
+  .asist-btn.justificada{ background:var(--gold-100); color:#8a6a1f; }
+  #printArea{ display:none; }
+  @media print{
+    body *{ visibility:hidden; }
+    #printArea, #printArea *{ visibility:visible; }
+    #printArea{ display:block; position:absolute; top:0; left:0; width:100%; padding:24px; }
+    #printArea h2{ font-size:20px; margin-bottom:2px; }
+    #printArea h3{ font-size:15px; margin:16px 0 6px; }
+    #printArea table{ width:100%; border-collapse:collapse; margin-top:6px; }
+    #printArea td, #printArea th{ border:1px solid #999; padding:4px 8px; font-size:12px; }
+    #printArea p{ font-size:13px; white-space:pre-wrap; }
+  }
 </style>
 </head>
 <body>
@@ -128,19 +144,36 @@
   </header>
 
   <nav class="tabs">
-    <button data-tab="socios" class="active">Socios</button>
+    <button data-tab="panel" class="active">Panel</button>
+    <button data-tab="socios">Socios</button>
     <button data-tab="cuotas">Cuotas</button>
     <button data-tab="incidencias">Incidencias</button>
-    <button disabled="" title="Próximamente en la siguiente fase">Actas</button>
-    <button disabled="" title="Próximamente en la siguiente fase">Convocatorias</button>
-    <button disabled="" title="Próximamente en la siguiente fase">Gastos</button>
+    <button data-tab="actas">Actas</button>
+    <button data-tab="convocatorias">Convocatorias</button>
+    <button data-tab="gastos">Gastos</button>
+    <button data-tab="ajustes">Ajustes</button>
   </nav>
 
   <main>
-    <section class="panel active" id="tab-socios">
+    <section class="panel active" id="tab-panel">
+      <div class="section-title"><h2>Panel</h2></div>
+      <div class="cards" id="panelCards" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px;">
+    <div class="metric"><div class="label">Total socios</div><div class="value">35</div></div>
+    <div class="metric ok"><div class="label">Cuotas pagadas (mes)</div><div class="value">0</div></div>
+    <div class="metric warn"><div class="label">Cuotas pendientes (mes)</div><div class="value">26</div></div>
+    <div class="metric warn"><div class="label">LPD sin firmar</div><div class="value">10</div></div>
+    <div class="metric"><div class="label">Incidencias abiertas</div><div class="value">0</div></div>
+    <div class="metric"><div class="label">Saldo histórico</div><div class="value">0,00 €</div></div>
+  </div>
+    </section>
+
+    <section class="panel" id="tab-socios">
       <div class="section-title">
         <h2>Socios</h2>
-        <button class="btn" onclick="openSocioForm()">+ Nuevo socio</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn secondary" onclick="imprimirSocios()">Imprimir listado</button>
+          <button class="btn" onclick="openSocioForm()">+ Nuevo socio</button>
+        </div>
       </div>
       <div class="toolbar" style="margin-bottom:14px;">
         <input type="text" id="socioSearch" placeholder="Buscar por nombre, residente o teléfono..." style="max-width:320px;">
@@ -161,6 +194,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;44bc8f65-53f5-4adf-a5fd-6c6d99e8c516&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;44bc8f65-53f5-4adf-a5fd-6c6d99e8c516&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;44bc8f65-53f5-4adf-a5fd-6c6d99e8c516&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -178,6 +212,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;b055de25-2c85-4ab2-a91e-303caa0b0a38&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;b055de25-2c85-4ab2-a91e-303caa0b0a38&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;b055de25-2c85-4ab2-a91e-303caa0b0a38&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -195,6 +230,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;f56a8110-a8d1-4573-90b7-adde76e04018&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;f56a8110-a8d1-4573-90b7-adde76e04018&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;f56a8110-a8d1-4573-90b7-adde76e04018&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -212,6 +248,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;ee3f8079-f5cf-46ce-89b2-5c06ac1d7a54&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;ee3f8079-f5cf-46ce-89b2-5c06ac1d7a54&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;ee3f8079-f5cf-46ce-89b2-5c06ac1d7a54&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -229,6 +266,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;68b8c8ab-cf8d-4bc3-9cd1-0212e90fd2a3&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;68b8c8ab-cf8d-4bc3-9cd1-0212e90fd2a3&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;68b8c8ab-cf8d-4bc3-9cd1-0212e90fd2a3&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -246,6 +284,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;fa0af324-40e2-4669-bc5e-1171dd29416d&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;fa0af324-40e2-4669-bc5e-1171dd29416d&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;fa0af324-40e2-4669-bc5e-1171dd29416d&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -263,6 +302,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;6d94babf-6b9c-4fec-ae17-1cc203f5d306&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;6d94babf-6b9c-4fec-ae17-1cc203f5d306&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;6d94babf-6b9c-4fec-ae17-1cc203f5d306&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -280,6 +320,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;549adb59-80ea-4c62-87ed-77fa4d0e75b8&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;549adb59-80ea-4c62-87ed-77fa4d0e75b8&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;549adb59-80ea-4c62-87ed-77fa4d0e75b8&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -297,6 +338,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;788be524-deb0-423a-8e9b-003435cede87&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;788be524-deb0-423a-8e9b-003435cede87&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;788be524-deb0-423a-8e9b-003435cede87&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -314,6 +356,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;cce781b4-7043-4899-b17f-6fb96770a4b1&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;cce781b4-7043-4899-b17f-6fb96770a4b1&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;cce781b4-7043-4899-b17f-6fb96770a4b1&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -331,6 +374,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;206e8e07-7646-449e-9830-db9e1591d7f2&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;206e8e07-7646-449e-9830-db9e1591d7f2&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;206e8e07-7646-449e-9830-db9e1591d7f2&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -348,6 +392,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;6bb1e81c-6e98-4217-a7b0-921ce76f483c&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;6bb1e81c-6e98-4217-a7b0-921ce76f483c&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;6bb1e81c-6e98-4217-a7b0-921ce76f483c&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -365,6 +410,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;81951f4e-3d95-4798-bf5f-9e492f0d9d23&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;81951f4e-3d95-4798-bf5f-9e492f0d9d23&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;81951f4e-3d95-4798-bf5f-9e492f0d9d23&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -382,6 +428,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;68c44180-6465-46a2-9c04-ae712200e764&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;68c44180-6465-46a2-9c04-ae712200e764&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;68c44180-6465-46a2-9c04-ae712200e764&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -399,6 +446,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;de6ee2fa-a43e-433a-bcf7-95c0e7024639&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;de6ee2fa-a43e-433a-bcf7-95c0e7024639&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;de6ee2fa-a43e-433a-bcf7-95c0e7024639&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -416,6 +464,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;7ce61a0d-aef1-4e28-9ab2-c32d098bc3fa&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;7ce61a0d-aef1-4e28-9ab2-c32d098bc3fa&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;7ce61a0d-aef1-4e28-9ab2-c32d098bc3fa&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -433,6 +482,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;4c1cc62c-cd7b-4ec0-aa46-0610e1d0d875&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;4c1cc62c-cd7b-4ec0-aa46-0610e1d0d875&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;4c1cc62c-cd7b-4ec0-aa46-0610e1d0d875&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -450,6 +500,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;f4fb63cd-1e5a-4756-b9b5-ca547ba63fe2&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;f4fb63cd-1e5a-4756-b9b5-ca547ba63fe2&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;f4fb63cd-1e5a-4756-b9b5-ca547ba63fe2&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -467,6 +518,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;316daf8d-7f8f-45f8-9c2e-737505726b3a&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;316daf8d-7f8f-45f8-9c2e-737505726b3a&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;316daf8d-7f8f-45f8-9c2e-737505726b3a&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -484,6 +536,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;5ffd7f4c-5005-45ba-9b8e-cd46dd924095&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;5ffd7f4c-5005-45ba-9b8e-cd46dd924095&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;5ffd7f4c-5005-45ba-9b8e-cd46dd924095&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -501,6 +554,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;3cb0e4d4-2e5b-4bbd-b54a-0038629e4958&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;3cb0e4d4-2e5b-4bbd-b54a-0038629e4958&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;3cb0e4d4-2e5b-4bbd-b54a-0038629e4958&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -518,6 +572,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;6c43fbbb-2448-4c36-a6cb-b49b594aea4a&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;6c43fbbb-2448-4c36-a6cb-b49b594aea4a&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;6c43fbbb-2448-4c36-a6cb-b49b594aea4a&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -535,6 +590,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;7d01d5bd-82cb-4c85-b499-68d71063d80b&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;7d01d5bd-82cb-4c85-b499-68d71063d80b&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;7d01d5bd-82cb-4c85-b499-68d71063d80b&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -552,6 +608,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;bebde128-3fee-487f-ad2e-c6b409129430&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;bebde128-3fee-487f-ad2e-c6b409129430&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;bebde128-3fee-487f-ad2e-c6b409129430&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -569,6 +626,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;cb313e4f-f177-439e-b3ec-a347e78a9b14&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;cb313e4f-f177-439e-b3ec-a347e78a9b14&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;cb313e4f-f177-439e-b3ec-a347e78a9b14&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -586,6 +644,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;e7c4324c-66f0-4657-98eb-9d8669d490d1&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;e7c4324c-66f0-4657-98eb-9d8669d490d1&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;e7c4324c-66f0-4657-98eb-9d8669d490d1&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -603,6 +662,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;cbd84c1d-3dfe-4f29-a972-40bd5d979d90&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;cbd84c1d-3dfe-4f29-a972-40bd5d979d90&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;cbd84c1d-3dfe-4f29-a972-40bd5d979d90&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -620,6 +680,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;a8059c16-9191-499d-8e92-bb6621f76545&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;a8059c16-9191-499d-8e92-bb6621f76545&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;a8059c16-9191-499d-8e92-bb6621f76545&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -637,6 +698,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;2a32cad4-6596-48cb-8370-cec91d4e6513&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;2a32cad4-6596-48cb-8370-cec91d4e6513&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;2a32cad4-6596-48cb-8370-cec91d4e6513&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -654,6 +716,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;8cfd2fa2-5247-4d8c-8c07-39548228ddca&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;8cfd2fa2-5247-4d8c-8c07-39548228ddca&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;8cfd2fa2-5247-4d8c-8c07-39548228ddca&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -671,6 +734,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;545c9e8f-1c40-4fc0-bdd1-6de0a2c7563a&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;545c9e8f-1c40-4fc0-bdd1-6de0a2c7563a&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;545c9e8f-1c40-4fc0-bdd1-6de0a2c7563a&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -688,6 +752,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;96d2a867-3b26-4638-a0b5-92650d8a4ec6&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;96d2a867-3b26-4638-a0b5-92650d8a4ec6&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;96d2a867-3b26-4638-a0b5-92650d8a4ec6&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -705,6 +770,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;aa0ddfd6-1bdb-4b8e-9a32-c7153fc1e8fb&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;aa0ddfd6-1bdb-4b8e-9a32-c7153fc1e8fb&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;aa0ddfd6-1bdb-4b8e-9a32-c7153fc1e8fb&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -722,6 +788,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;0d5c419b-9ec0-4fbc-b185-31213f3d91f9&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;0d5c419b-9ec0-4fbc-b185-31213f3d91f9&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;0d5c419b-9ec0-4fbc-b185-31213f3d91f9&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -739,6 +806,7 @@
       <td>—</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm(&#39;a12d5409-1c43-4dd9-bd47-1e5bfa2ddc6c&#39;)">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo(&#39;a12d5409-1c43-4dd9-bd47-1e5bfa2ddc6c&#39;)">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio(&#39;a12d5409-1c43-4dd9-bd47-1e5bfa2ddc6c&#39;)">Eliminar</button>
       </td>
     </tr>
@@ -753,6 +821,7 @@
           <span id="cuotaMesLabel" class="muted" style="min-width:140px;"></span>
           <button class="btn secondary" onclick="cambiarMes(-1)">← Mes anterior</button>
           <button class="btn secondary" onclick="cambiarMes(1)">Mes siguiente →</button>
+          <button class="btn secondary" onclick="imprimirCuotasInforme()">Imprimir</button>
         </div>
       </div>
       <div class="cards" id="cuotasResumen" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px;"></div>
@@ -765,15 +834,235 @@
     <section class="panel" id="tab-incidencias">
       <div class="section-title">
         <h2>Incidencias y reuniones</h2>
-        <button class="btn" onclick="openIncidenciaForm()">+ Nueva entrada</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn secondary" onclick="imprimirIncidenciasInforme()">Imprimir listado</button>
+          <button class="btn" onclick="openIncidenciaForm()">+ Nueva entrada</button>
+        </div>
       </div>
       <div class="card"><div class="tablewrap"><table id="tableIncidencias">
         <thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>Residente</th><th>Responsable</th><th>Estado</th><th></th></tr></thead>
         <tbody></tbody>
       </table></div></div>
     </section>
+
+    <section class="panel" id="tab-actas">
+      <div id="actasListView">
+        <div class="section-title">
+          <h2>Actas de reuniones</h2>
+          <div style="display:flex; gap:8px;">
+            <button class="btn secondary" onclick="imprimirIndiceActas()">Imprimir índice</button>
+            <button class="btn" onclick="openActaEditor()">+ Nueva acta</button>
+          </div>
+        </div>
+        <div class="card"><div class="tablewrap"><table id="tableActas">
+          <thead><tr><th>Nº de acta</th><th>Fecha</th><th>Tipo de sesión</th><th>Asistentes</th><th>Estado</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div></div>
+      </div>
+
+      <div id="actaEditorView" style="display:none;">
+        <div class="section-title">
+          <h2 id="actaEditorTitle">Nueva acta</h2>
+          <button class="btn secondary" onclick="cerrarActaEditor()">← Volver al listado</button>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <h3 style="margin-bottom:2px;">Datos de la sesión</h3>
+          <p class="muted" id="actaNumeroPreview" style="margin:0 0 12px;"></p>
+          <div class="grid2">
+            <div class="field"><label>Órgano convocante</label><select id="a_organo">
+              <option>Junta directiva</option>
+              <option>Asamblea general de socios</option>
+            </select></div>
+            <div class="field"><label>Naturaleza</label><select id="a_naturaleza">
+              <option>Ordinaria</option>
+              <option>Extraordinaria</option>
+            </select></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Fecha</label><input type="date" id="a_fecha"></div>
+            <div class="field"><label>Estado del documento</label><select id="a_estado">
+              <option>Borrador</option>
+              <option>Aprobada</option>
+            </select></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Hora primera convocatoria</label><input type="text" id="a_horaPrimera" placeholder="17:00"></div>
+            <div class="field"><label>Hora segunda convocatoria</label><input type="text" id="a_horaSegunda" placeholder="17:30"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Modalidad</label><select id="a_modalidad">
+              <option>Presencial en sede social</option>
+              <option>Virtual mediante plataforma digital</option>
+              <option>Híbrido</option>
+            </select></div>
+            <div class="field"><label>Detalle del lugar / plataforma</label><input type="text" id="a_lugarDetalle"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Preside</label><input type="text" id="a_preside" list="listaJunta"></div>
+            <div class="field"><label>Secretario/a</label><input type="text" id="a_secretario" list="listaJunta"></div>
+          </div>
+          <datalist id="listaJunta"></datalist>
+          <div class="field">
+            <label>Orden del día (un punto por línea)</label>
+            <textarea id="a_ordenDia" rows="4" style="width:100%; font-family:&#39;Inter&#39;,sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;" placeholder="Lectura y aprobación del acta anterior
+Balance económico
+Ruegos y preguntas"></textarea>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <h3 style="margin-bottom:4px;">Asistencia de socios</h3>
+          <p class="muted" style="margin:0 0 12px;">Clic en cada socio: ausente → presente → ausente justificado.</p>
+          <div class="cards" id="actaAsistenciaResumen" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:14px;"></div>
+          <input type="text" id="a_buscarSocio" placeholder="Buscar socio o residente..." style="margin-bottom:10px;">
+          <div class="tablewrap"><table id="tableActaAsistencia">
+            <thead><tr><th>Familiar</th><th>Residente</th><th>Asistencia</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <h3 style="margin-bottom:12px;">Desarrollo de la reunión</h3>
+          <div class="field"><label>Deliberaciones</label>
+            <textarea id="a_desarrollo" rows="5" style="width:100%; font-family:&#39;Inter&#39;,sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;"></textarea>
+          </div>
+          <div class="field">
+            <label>Acuerdos adoptados</label>
+            <div class="tablewrap"><table id="tableActaAcuerdos">
+              <thead><tr><th style="width:90px;">Código</th><th>Descripción</th><th style="width:150px;">Responsable</th><th style="width:130px;">Plazo</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table></div>
+            <button type="button" class="btn secondary" style="margin-top:8px; padding:6px 12px; font-size:12.5px;" onclick="addAcuerdo()">+ Añadir acuerdo</button>
+          </div>
+          <div class="field"><label>Ruegos y preguntas</label>
+            <textarea id="a_ruegos" rows="3" style="width:100%; font-family:&#39;Inter&#39;,sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;"></textarea>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <h3 style="margin-bottom:12px;">Cierre</h3>
+          <div class="grid2">
+            <div class="field"><label>Hora de levantamiento de la sesión</label><input type="text" id="a_horaFin"></div>
+            <div class="field"><label>Próxima reunión prevista</label><input type="text" id="a_proximaReunion"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Firma presidente/a</label><input type="text" id="a_firmaPresidente"></div>
+            <div class="field"><label>Firma secretario/a</label><input type="text" id="a_firmaSecretario"></div>
+          </div>
+        </div>
+
+        <div class="modal-actions" style="justify-content:flex-start;">
+          <button class="btn" onclick="saveActa()">Guardar acta</button>
+          <button class="btn secondary" onclick="cerrarActaEditor()">Cancelar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-convocatorias">
+      <div id="convocatoriasListView">
+        <div class="section-title">
+          <h2>Convocatorias de Junta / Asamblea</h2>
+          <button class="btn" onclick="openConvocatoriaEditor()">+ Nueva convocatoria</button>
+        </div>
+        <div class="card"><div class="tablewrap"><table id="tableConvocatorias">
+          <thead><tr><th>Fecha reunión</th><th>Tipo</th><th>Destinatarios</th><th>Lugar</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div></div>
+      </div>
+
+      <div id="convocatoriaEditorView" style="display:none;">
+        <div class="section-title">
+          <h2 id="convocatoriaEditorTitle">Nueva convocatoria</h2>
+          <button class="btn secondary" onclick="cerrarConvocatoriaEditor()">← Volver al listado</button>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="grid2">
+            <div class="field"><label>Tipo de asamblea</label><select id="cv_tipo">
+              <option>Ordinaria</option>
+              <option>Extraordinaria</option>
+            </select></div>
+            <div class="field"><label>Convocar a</label><select id="cv_destinatarios">
+              <option value="todos">Todos los socios</option>
+              <option value="junta">Solo la Junta Directiva</option>
+            </select></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Fecha de la reunión</label><input type="date" id="cv_fecha"></div>
+            <div class="field"><label>Hora primera / segunda convocatoria</label>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="cv_horaPrimera" placeholder="17:00">
+                <input type="text" id="cv_horaSegunda" placeholder="17:30">
+              </div>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Lugar de celebración</label><input type="text" id="cv_lugar"></div>
+            <div class="field"><label>Dirección completa</label><input type="text" id="cv_direccion"></div>
+          </div>
+          <div class="field">
+            <label>Orden del día (un punto por línea)</label>
+            <textarea id="cv_ordenDia" rows="4" style="width:100%; font-family:&#39;Inter&#39;,sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;" placeholder="Lectura y, si procede, aprobación del acta anterior.
+Informe anual de actividades.
+Ruegos y preguntas."></textarea>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Ciudad de emisión</label><input type="text" id="cv_ciudad" placeholder="Oviedo"></div>
+            <div class="field"><label>Fecha de emisión</label><input type="date" id="cv_fechaEmision"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Presidente/a (firma)</label><input type="text" id="cv_presidente" list="listaJuntaConv"></div>
+            <div class="field"><label>Secretario/a (firma)</label><input type="text" id="cv_secretario" list="listaJuntaConv"></div>
+          </div>
+          <datalist id="listaJuntaConv"></datalist>
+        </div>
+        <div class="modal-actions" style="justify-content:flex-start;">
+          <button class="btn" onclick="saveConvocatoria()">Guardar convocatoria</button>
+          <button class="btn secondary" onclick="cerrarConvocatoriaEditor()">Cancelar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-gastos">
+      <div class="section-title">
+        <h2>Gastos de la asociación</h2>
+        <div style="display:flex; gap:8px;">
+          <button class="btn secondary" onclick="imprimirGastosInforme()">Imprimir informe</button>
+          <button class="btn" onclick="openGastoForm()">+ Nuevo gasto</button>
+        </div>
+      </div>
+      <div class="cards" id="gastosResumen" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px;"></div>
+      <div class="card"><div class="tablewrap"><table id="tableGastos">
+        <thead><tr><th>Fecha</th><th>Concepto</th><th>Proveedor</th><th>Importe (€)</th><th>Documento</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div></div>
+    </section>
+
+    <section class="panel" id="tab-ajustes">
+      <div class="section-title"><h2>Ajustes</h2></div>
+      <div class="card" style="max-width:640px;">
+        <h3 style="margin-bottom:10px;">Dar de alta o quitar el acceso a la Junta Directiva</h3>
+        <p style="margin:0 0 12px;">Esto se hace directamente en Supabase, no desde esta web (es la forma más segura y no tiene ningún coste). Solo quien administre la aplicación necesita hacer esto.</p>
+        <p style="margin:0 0 6px;"><strong>Para dar de alta a alguien nuevo:</strong></p>
+        <ol style="margin:0 0 14px; padding-left:20px;">
+          <li>Entra en <strong>supabase.com</strong>, en el proyecto de la asociación.</li>
+          <li>Menú lateral → <strong>Authentication</strong> → <strong>Users</strong>.</li>
+          <li><strong>Add user</strong> → <strong>Create new user</strong>.</li>
+          <li>Escribe su email y una contraseña, marca <strong>"Auto Confirm User"</strong> y guarda.</li>
+        </ol>
+        <p style="margin:0 0 6px;"><strong>Para quitarle el acceso a alguien</strong> (por ejemplo, si su familiar deja de estar en la residencia):</p>
+        <ol style="margin:0; padding-left:20px;">
+          <li>Menú lateral → <strong>Authentication</strong> → <strong>Users</strong>.</li>
+          <li>Busca a esa persona por su email en la lista.</li>
+          <li>Pulsa los tres puntos (⋯) junto a su nombre → <strong>Delete user</strong>.</li>
+          <li>Desde ese momento no podrá volver a entrar en la web, con ninguna contraseña.</li>
+        </ol>
+      </div>
+    </section>
   </main>
 </div>
+
+<div id="printArea"></div>
 
 <div class="modal-bg" id="modalBg"><div class="modal" id="modalContent"></div></div>
 <div class="toast" id="toast"></div>
@@ -828,6 +1117,7 @@ async function mostrarApp(session){
   document.getElementById('userEmail').textContent = session.user.email;
   await cargarAjustes();
   await cargarSocios();
+  await renderPanel();
 }
 
 // ---------- TABS (preparado para futuras pestañas) ----------
@@ -839,6 +1129,10 @@ document.querySelectorAll('nav.tabs button[data-tab]').forEach(btn=>{
     document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab==='cuotas') cargarCuotas();
     if(btn.dataset.tab==='incidencias') cargarIncidencias();
+    if(btn.dataset.tab==='actas') cargarActas();
+    if(btn.dataset.tab==='convocatorias') cargarConvocatorias();
+    if(btn.dataset.tab==='gastos') cargarGastos();
+    if(btn.dataset.tab==='panel') renderPanel();
   });
 });
 
@@ -867,6 +1161,7 @@ function renderSocios(){
       <td>${escapeHtml(s.email)||'—'}</td>
       <td>
         <button class="icon-btn" onclick="openSocioForm('${s.id}')">Editar</button>
+        <button class="icon-btn" onclick="abrirRecibo('${s.id}')">Recibo</button>
         <button class="icon-btn" onclick="deleteSocio('${s.id}')">Eliminar</button>
       </td>
     </tr>
@@ -1097,6 +1392,621 @@ async function deleteIncidencia(id){
   if(error){ showToast('Error al eliminar: '+error.message); return; }
   await cargarIncidencias();
   showToast('Entrada eliminada.');
+}
+
+// ---------- ACTAS ----------
+let actas = [];
+let actaDraft = null;
+function listItems(text){ return (text||'').split('\n').map(s=>s.trim()).filter(Boolean); }
+function generarNumero(fecha, excludeId){
+  const year = fecha ? new Date(fecha+'T00:00:00').getFullYear() : new Date().getFullYear();
+  const count = actas.filter(a=>a.id!==excludeId && a.numero && a.numero.endsWith('/'+year)).length;
+  return String(count+1).padStart(2,'0') + '/' + year;
+}
+async function cargarActas(){
+  const { data, error } = await db.from('actas').select('*').order('fecha', {ascending:false});
+  if(error){ showToast('Error cargando actas: '+error.message); return; }
+  actas = data;
+  renderActas();
+}
+function renderActas(){
+  const body = document.querySelector('#tableActas tbody');
+  body.innerHTML = actas.length ? actas.map(a=>{
+    const presentes = Object.values(a.asistencia||{}).filter(v=>v==='presente').length;
+    const estado = a.estado||'Borrador';
+    return `<tr>
+      <td>Acta ${a.numero}</td><td>${a.fecha||'—'}</td><td>${a.organo} · ${a.naturaleza}</td>
+      <td>${presentes} / ${socios.length}</td>
+      <td><span class="pill ${estado==='Aprobada'?'si':'no'}">${estado}</span></td>
+      <td>
+        <button class="icon-btn" onclick="openActaEditor('${a.id}')">Editar</button>
+        <button class="icon-btn" onclick="imprimirActa('${a.id}')">Imprimir</button>
+        <button class="icon-btn" onclick="deleteActa('${a.id}')">Eliminar</button>
+      </td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="6" class="empty">Todavía no se ha registrado ninguna acta.</td></tr>`;
+}
+function openActaEditor(id){
+  const existing = id ? actas.find(a=>a.id===id) : null;
+  actaDraft = existing ? JSON.parse(JSON.stringify(existing)) : {
+    id:null, numero:null, organo:'Junta directiva', naturaleza:'Ordinaria',
+    fecha:new Date().toISOString().slice(0,10), hora_primera:'', hora_segunda:'', hora_fin:'',
+    modalidad:'Presencial en sede social', lugar_detalle:'',
+    preside:'', secretario:'', orden_dia:'', asistencia:{},
+    desarrollo:'', acuerdos:[], ruegos:'', proxima_reunion:'', estado:'Borrador',
+    firma_presidente:'', firma_secretario:''
+  };
+  if(!actaDraft.acuerdos) actaDraft.acuerdos = [];
+  if(!actaDraft.asistencia) actaDraft.asistencia = {};
+  document.getElementById('actaEditorTitle').textContent = existing ? `Acta nº ${existing.numero}` : 'Nueva acta';
+  document.getElementById('actaNumeroPreview').textContent = existing
+    ? `Nº de acta: ${existing.numero} (fijo)`
+    : `Se asignará el siguiente número correlativo del año al guardar (ej. ${generarNumero(actaDraft.fecha)})`;
+  document.getElementById('a_fecha').value = actaDraft.fecha;
+  document.getElementById('a_organo').value = actaDraft.organo;
+  document.getElementById('a_naturaleza').value = actaDraft.naturaleza;
+  document.getElementById('a_estado').value = actaDraft.estado;
+  document.getElementById('a_horaPrimera').value = actaDraft.hora_primera;
+  document.getElementById('a_horaSegunda').value = actaDraft.hora_segunda;
+  document.getElementById('a_horaFin').value = actaDraft.hora_fin;
+  document.getElementById('a_modalidad').value = actaDraft.modalidad;
+  document.getElementById('a_lugarDetalle').value = actaDraft.lugar_detalle;
+  document.getElementById('a_preside').value = actaDraft.preside;
+  document.getElementById('a_secretario').value = actaDraft.secretario;
+  document.getElementById('a_ordenDia').value = actaDraft.orden_dia;
+  document.getElementById('a_desarrollo').value = actaDraft.desarrollo;
+  document.getElementById('a_ruegos').value = actaDraft.ruegos;
+  document.getElementById('a_proximaReunion').value = actaDraft.proxima_reunion;
+  document.getElementById('a_firmaPresidente').value = actaDraft.firma_presidente;
+  document.getElementById('a_firmaSecretario').value = actaDraft.firma_secretario;
+  document.getElementById('a_buscarSocio').value = '';
+  document.getElementById('listaJunta').innerHTML = socios.filter(s=>s.cargo)
+    .map(s=>`<option value="${escapeAttr(s.nombre)}">${escapeAttr(s.cargo)}</option>`).join('');
+  renderAsistenciaTable();
+  renderAcuerdosTable();
+  document.getElementById('actasListView').style.display='none';
+  document.getElementById('actaEditorView').style.display='block';
+}
+function cerrarActaEditor(){
+  actaDraft = null;
+  document.getElementById('actaEditorView').style.display='none';
+  document.getElementById('actasListView').style.display='block';
+}
+function renderAsistenciaTable(){
+  const q = (document.getElementById('a_buscarSocio').value||'').toLowerCase();
+  const lista = [...socios].filter(s=>!q || (s.nombre+s.residente).toLowerCase().includes(q));
+  const body = document.querySelector('#tableActaAsistencia tbody');
+  body.innerHTML = lista.map(s=>{
+    const estado = actaDraft.asistencia[s.id] || 'ausente';
+    const label = estado==='presente' ? 'Presente' : estado==='justificada' ? 'Ausente justificado' : 'Ausente';
+    return `<tr>
+      <td>${escapeHtml(s.nombre)}</td><td>${escapeHtml(s.residente)}</td>
+      <td><button class="asist-btn ${estado}" onclick="toggleAsistencia('${s.id}')">${label}</button></td>
+    </tr>`;
+  }).join('');
+  const presentes = Object.values(actaDraft.asistencia).filter(v=>v==='presente').length;
+  const justificados = Object.values(actaDraft.asistencia).filter(v=>v==='justificada').length;
+  document.getElementById('actaAsistenciaResumen').innerHTML = `
+    <div class="metric ok"><div class="label">Presentes</div><div class="value">${presentes}</div></div>
+    <div class="metric"><div class="label">Ausentes justif.</div><div class="value">${justificados}</div></div>
+    <div class="metric warn"><div class="label">Ausentes</div><div class="value">${socios.length-presentes-justificados}</div></div>
+    <div class="metric"><div class="label">Total socios</div><div class="value">${socios.length}</div></div>
+  `;
+}
+document.getElementById('a_buscarSocio').addEventListener('input', renderAsistenciaTable);
+function toggleAsistencia(socioId){
+  const actual = actaDraft.asistencia[socioId] || 'ausente';
+  const siguiente = actual==='ausente' ? 'presente' : actual==='presente' ? 'justificada' : 'ausente';
+  if(siguiente==='ausente') delete actaDraft.asistencia[socioId];
+  else actaDraft.asistencia[socioId] = siguiente;
+  renderAsistenciaTable();
+}
+function renderAcuerdosTable(){
+  const body = document.querySelector('#tableActaAcuerdos tbody');
+  const prefijo = actaDraft.numero ? actaDraft.numero.split('/')[0] : 'XX';
+  body.innerHTML = actaDraft.acuerdos.length ? actaDraft.acuerdos.map((ac,i)=>`
+    <tr>
+      <td><span class="muted">AC-${prefijo}-${String(i+1).padStart(2,'0')}</span></td>
+      <td><input type="text" value="${escapeAttr(ac.descripcion)}" onchange="updateAcuerdo(${i},'descripcion',this.value)"></td>
+      <td><input type="text" value="${escapeAttr(ac.responsable)}" onchange="updateAcuerdo(${i},'responsable',this.value)"></td>
+      <td><input type="text" placeholder="DD/MM/AAAA" value="${escapeAttr(ac.plazo)}" onchange="updateAcuerdo(${i},'plazo',this.value)"></td>
+      <td><button class="icon-btn" onclick="removeAcuerdo(${i})">Quitar</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="5" class="empty">Sin acuerdos añadidos.</td></tr>`;
+}
+function addAcuerdo(){ actaDraft.acuerdos.push({descripcion:'',responsable:'',plazo:''}); renderAcuerdosTable(); }
+function updateAcuerdo(i,key,value){ actaDraft.acuerdos[i][key]=value; }
+function removeAcuerdo(i){ actaDraft.acuerdos.splice(i,1); renderAcuerdosTable(); }
+async function saveActa(){
+  actaDraft.fecha = document.getElementById('a_fecha').value;
+  actaDraft.organo = document.getElementById('a_organo').value;
+  actaDraft.naturaleza = document.getElementById('a_naturaleza').value;
+  actaDraft.estado = document.getElementById('a_estado').value;
+  actaDraft.hora_primera = document.getElementById('a_horaPrimera').value.trim();
+  actaDraft.hora_segunda = document.getElementById('a_horaSegunda').value.trim();
+  actaDraft.hora_fin = document.getElementById('a_horaFin').value.trim();
+  actaDraft.modalidad = document.getElementById('a_modalidad').value;
+  actaDraft.lugar_detalle = document.getElementById('a_lugarDetalle').value.trim();
+  actaDraft.preside = document.getElementById('a_preside').value.trim();
+  actaDraft.secretario = document.getElementById('a_secretario').value.trim();
+  actaDraft.orden_dia = document.getElementById('a_ordenDia').value;
+  actaDraft.desarrollo = document.getElementById('a_desarrollo').value;
+  actaDraft.ruegos = document.getElementById('a_ruegos').value;
+  actaDraft.proxima_reunion = document.getElementById('a_proximaReunion').value.trim();
+  actaDraft.firma_presidente = document.getElementById('a_firmaPresidente').value.trim();
+  actaDraft.firma_secretario = document.getElementById('a_firmaSecretario').value.trim();
+  if(!actaDraft.fecha){ showToast('Indica la fecha de la reunión.'); return; }
+  if(!actaDraft.numero) actaDraft.numero = generarNumero(actaDraft.fecha, actaDraft.id);
+  const payload = {...actaDraft};
+  const id = payload.id;
+  delete payload.id;
+  let error;
+  if(id){ ({ error } = await db.from('actas').update(payload).eq('id', id)); }
+  else { ({ error } = await db.from('actas').insert(payload)); }
+  if(error){ showToast('Error al guardar: '+error.message); return; }
+  showToast('Acta guardada.');
+  cerrarActaEditor();
+  await cargarActas();
+}
+async function deleteActa(id){
+  if(!confirm('¿Eliminar esta acta?')) return;
+  const { error } = await db.from('actas').delete().eq('id', id);
+  if(error){ showToast('Error al eliminar: '+error.message); return; }
+  await cargarActas();
+}
+function imprimirActa(id){
+  const a = actas.find(x=>x.id===id);
+  if(!a) return;
+  const presentes = socios.filter(s=>(a.asistencia||{})[s.id]==='presente');
+  const justificados = socios.filter(s=>(a.asistencia||{})[s.id]==='justificada');
+  const nombreLista = arr => arr.length ? arr.map(s=>escapeHtml(s.nombre)).join(', ') : 'Ninguno';
+  const prefijo = a.numero.split('/')[0];
+  const acuerdosFilas = (a.acuerdos||[]).filter(ac=>ac.descripcion).map((ac,i)=>`
+    <tr><td>AC-${prefijo}-${String(i+1).padStart(2,'0')}</td><td>${escapeHtml(ac.descripcion)}</td><td>${escapeHtml(ac.responsable)||'—'}</td><td>${escapeHtml(ac.plazo)||'—'}</td></tr>
+  `).join('');
+  document.getElementById('printArea').innerHTML = `
+    <h2>Asociación de familiares del CPRPM Naranco</h2>
+    <p class="muted" style="margin:0 0 12px;">ACTA NÚMERO: ${a.numero} — Estado: ${a.estado}</p>
+    <h3>Datos de la sesión</h3>
+    <table>
+      <tr><td><strong>Órgano</strong></td><td>${a.organo}</td><td><strong>Naturaleza</strong></td><td>${a.naturaleza}</td></tr>
+      <tr><td><strong>Fecha</strong></td><td>${a.fecha||'—'}</td><td><strong>Hora</strong></td><td>${a.hora_primera||'—'} / ${a.hora_segunda||'—'} convocatoria</td></tr>
+      <tr><td><strong>Lugar</strong></td><td colspan="3">${a.modalidad}${a.lugar_detalle?' — '+escapeHtml(a.lugar_detalle):''}</td></tr>
+    </table>
+    <h3>Asistentes</h3>
+    <table>
+      <tr><td><strong>Preside</strong></td><td>${escapeHtml(a.preside)||'—'}</td></tr>
+      <tr><td><strong>Secretario/a</strong></td><td>${escapeHtml(a.secretario)||'—'}</td></tr>
+      <tr><td><strong>Presentes (${presentes.length}/${socios.length})</strong></td><td>${nombreLista(presentes)}</td></tr>
+      <tr><td><strong>Ausencias justificadas</strong></td><td>${nombreLista(justificados)}</td></tr>
+    </table>
+    <h3>Orden del día</h3>
+    <p>${listItems(a.orden_dia).map((t,i)=>(i+1)+'. '+escapeHtml(t)).join('<br>') || 'No se especificó.'}</p>
+    <h3>Desarrollo de la sesión</h3>
+    <p>${escapeHtml(a.desarrollo) || 'Sin observaciones.'}</p>
+    <h3>Acuerdos adoptados</h3>
+    <table>
+      <tr><th>Código</th><th>Descripción</th><th>Responsable</th><th>Plazo</th></tr>
+      ${acuerdosFilas || '<tr><td colspan="4">No se adoptaron acuerdos.</td></tr>'}
+    </table>
+    <h3>Ruegos y preguntas</h3>
+    <p>${escapeHtml(a.ruegos) || 'Sin intervenciones.'}</p>
+    <h3>Cierre y firmas</h3>
+    <p>Se levanta la sesión a las ${a.hora_fin||'—'}. Próxima reunión: ${escapeHtml(a.proxima_reunion)||'por determinar'}.</p>
+    <table style="margin-top:10px;">
+      <tr>
+        <td style="width:50%;">Fdo.: ${escapeHtml(a.firma_secretario)||'_______________'}<br><strong>Secretario/a</strong></td>
+        <td style="width:50%;">Vº Bº: ${escapeHtml(a.firma_presidente)||'_______________'}<br><strong>Presidente/a</strong></td>
+      </tr>
+    </table>
+  `;
+  window.print();
+}
+
+// ---------- CONVOCATORIAS ----------
+let convocatorias = [];
+let convocatoriaDraft = null;
+async function cargarConvocatorias(){
+  const { data, error } = await db.from('convocatorias').select('*').order('fecha', {ascending:false});
+  if(error){ showToast('Error cargando convocatorias: '+error.message); return; }
+  convocatorias = data;
+  renderConvocatorias();
+}
+function renderConvocatorias(){
+  const body = document.querySelector('#tableConvocatorias tbody');
+  body.innerHTML = convocatorias.length ? convocatorias.map(c=>`
+    <tr>
+      <td>${c.fecha||'—'}</td><td>${c.tipo}</td><td>${c.destinatarios==='junta'?'Junta Directiva':'Todos los socios'}</td>
+      <td>${escapeHtml(c.lugar)||'—'}</td>
+      <td>
+        <button class="icon-btn" onclick="openConvocatoriaEditor('${c.id}')">Editar</button>
+        <button class="icon-btn" onclick="imprimirConvocatoria('${c.id}')">Imprimir</button>
+        <button class="icon-btn" onclick="abrirEnvioConvocatoria('${c.id}')">WhatsApp</button>
+        <button class="icon-btn" onclick="deleteConvocatoria('${c.id}')">Eliminar</button>
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="5" class="empty">Todavía no se ha creado ninguna convocatoria.</td></tr>`;
+}
+function openConvocatoriaEditor(id){
+  const existing = id ? convocatorias.find(c=>c.id===id) : null;
+  convocatoriaDraft = existing ? JSON.parse(JSON.stringify(existing)) : {
+    id:null, tipo:'Ordinaria', destinatarios:'todos', fecha:'', hora_primera:'', hora_segunda:'',
+    lugar:'', direccion:'', orden_dia:'', ciudad:'', fecha_emision:new Date().toISOString().slice(0,10),
+    presidente:'', secretario:''
+  };
+  document.getElementById('convocatoriaEditorTitle').textContent = existing ? 'Editar convocatoria' : 'Nueva convocatoria';
+  document.getElementById('cv_tipo').value = convocatoriaDraft.tipo;
+  document.getElementById('cv_destinatarios').value = convocatoriaDraft.destinatarios;
+  document.getElementById('cv_fecha').value = convocatoriaDraft.fecha;
+  document.getElementById('cv_horaPrimera').value = convocatoriaDraft.hora_primera;
+  document.getElementById('cv_horaSegunda').value = convocatoriaDraft.hora_segunda;
+  document.getElementById('cv_lugar').value = convocatoriaDraft.lugar;
+  document.getElementById('cv_direccion').value = convocatoriaDraft.direccion;
+  document.getElementById('cv_ordenDia').value = convocatoriaDraft.orden_dia;
+  document.getElementById('cv_ciudad').value = convocatoriaDraft.ciudad;
+  document.getElementById('cv_fechaEmision').value = convocatoriaDraft.fecha_emision;
+  document.getElementById('cv_presidente').value = convocatoriaDraft.presidente;
+  document.getElementById('cv_secretario').value = convocatoriaDraft.secretario;
+  document.getElementById('listaJuntaConv').innerHTML = socios.filter(s=>s.cargo)
+    .map(s=>`<option value="${escapeAttr(s.nombre)}">${escapeAttr(s.cargo)}</option>`).join('');
+  document.getElementById('convocatoriasListView').style.display='none';
+  document.getElementById('convocatoriaEditorView').style.display='block';
+}
+function cerrarConvocatoriaEditor(){
+  convocatoriaDraft = null;
+  document.getElementById('convocatoriaEditorView').style.display='none';
+  document.getElementById('convocatoriasListView').style.display='block';
+}
+async function saveConvocatoria(){
+  convocatoriaDraft.tipo = document.getElementById('cv_tipo').value;
+  convocatoriaDraft.destinatarios = document.getElementById('cv_destinatarios').value;
+  convocatoriaDraft.fecha = document.getElementById('cv_fecha').value;
+  convocatoriaDraft.hora_primera = document.getElementById('cv_horaPrimera').value.trim();
+  convocatoriaDraft.hora_segunda = document.getElementById('cv_horaSegunda').value.trim();
+  convocatoriaDraft.lugar = document.getElementById('cv_lugar').value.trim();
+  convocatoriaDraft.direccion = document.getElementById('cv_direccion').value.trim();
+  convocatoriaDraft.orden_dia = document.getElementById('cv_ordenDia').value;
+  convocatoriaDraft.ciudad = document.getElementById('cv_ciudad').value.trim();
+  convocatoriaDraft.fecha_emision = document.getElementById('cv_fechaEmision').value;
+  convocatoriaDraft.presidente = document.getElementById('cv_presidente').value.trim();
+  convocatoriaDraft.secretario = document.getElementById('cv_secretario').value.trim();
+  if(!convocatoriaDraft.fecha){ showToast('Indica la fecha de la reunión.'); return; }
+  const payload = {...convocatoriaDraft};
+  const id = payload.id;
+  delete payload.id;
+  let error;
+  if(id){ ({ error } = await db.from('convocatorias').update(payload).eq('id', id)); }
+  else { ({ error } = await db.from('convocatorias').insert(payload)); }
+  if(error){ showToast('Error al guardar: '+error.message); return; }
+  showToast('Convocatoria guardada.');
+  cerrarConvocatoriaEditor();
+  await cargarConvocatorias();
+}
+async function deleteConvocatoria(id){
+  if(!confirm('¿Eliminar esta convocatoria?')) return;
+  const { error } = await db.from('convocatorias').delete().eq('id', id);
+  if(error){ showToast('Error al eliminar: '+error.message); return; }
+  await cargarConvocatorias();
+}
+function fechaLarga(fecha){
+  if(!fecha) return '[fecha por determinar]';
+  const d = new Date(fecha+'T00:00:00');
+  return d.toLocaleDateString('es-ES',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+}
+function imprimirConvocatoria(id){
+  const c = convocatorias.find(x=>x.id===id);
+  if(!c) return;
+  const destinatarioTexto = c.destinatarios==='junta' ? 'a los miembros de la Junta Directiva' : 'a todos los socios';
+  document.getElementById('printArea').innerHTML = `
+    <h2>Asociación de familiares del CPRPM Naranco</h2>
+    <h3>CONVOCATORIA DE ASAMBLEA ${c.tipo.toUpperCase()}</h3>
+    <p>Por acuerdo de la Junta Directiva, se convoca ${destinatarioTexto} a la Asamblea General ${c.tipo} de la Asociación,
+    que tendrá lugar el próximo ${fechaLarga(c.fecha)}, en ${escapeHtml(c.lugar)||'[lugar por determinar]'}${c.direccion?', sito en '+escapeHtml(c.direccion):''},
+    a las ${c.hora_primera||'[hora]'} horas en primera convocatoria, y a las ${c.hora_segunda||'[hora]'} horas en segunda convocatoria, con el siguiente:</p>
+    <h3>ORDEN DEL DÍA</h3>
+    <p>${listItems(c.orden_dia).map((t,i)=>(i+1)+'. '+escapeHtml(t)).join('<br>') || 'No se especificó.'}</p>
+    <p style="margin-top:18px;">En ${escapeHtml(c.ciudad)||'[ciudad]'}, a ${fechaLarga(c.fecha_emision)}.</p>
+    <table style="margin-top:20px;">
+      <tr>
+        <td style="width:50%;">El Presidente de la Asociación<br><br>(Firma)<br><br>Fdo.: ${escapeHtml(c.presidente)||'_______________________'}</td>
+        <td style="width:50%;">La Secretaria de la Asociación<br><br>(Firma)<br><br>Fdo.: ${escapeHtml(c.secretario)||'_______________________'}</td>
+      </tr>
+    </table>
+  `;
+  window.print();
+}
+function abrirEnvioConvocatoria(id){
+  const c = convocatorias.find(x=>x.id===id);
+  if(!c) return;
+  const destinatarios = c.destinatarios==='junta' ? socios.filter(s=>s.cargo) : socios;
+  const conTelefono = destinatarios.filter(s=>s.tel1);
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Enviar recordatorio — ${c.destinatarios==='junta'?'Junta Directiva':'Todos los socios'}</h3>
+    <p class="muted" style="margin:0 0 12px;">Se abrirá WhatsApp con un mensaje ya redactado para cada persona.</p>
+    <div class="tablewrap" style="max-height:320px; overflow-y:auto;"><table>
+      <thead><tr><th>Nombre</th><th>Teléfono</th><th></th></tr></thead>
+      <tbody>
+        ${conTelefono.length ? conTelefono.map(s=>`
+          <tr><td>${escapeHtml(s.nombre)}${s.cargo?' ('+escapeHtml(s.cargo)+')':''}</td><td>${escapeHtml(s.tel1)}</td>
+          <td><button class="icon-btn" onclick="enviarConvocatoriaWA('${c.id}','${s.id}')">WhatsApp</button></td></tr>
+        `).join('') : '<tr><td colspan="3" class="empty">Nadie en este grupo tiene teléfono registrado.</td></tr>'}
+      </tbody>
+    </table></div>
+    <div class="modal-actions"><button class="btn secondary" onclick="closeModal()">Cerrar</button></div>
+  `;
+  openModal();
+}
+function enviarConvocatoriaWA(convId, socioId){
+  const c = convocatorias.find(x=>x.id===convId);
+  const s = socios.find(x=>x.id===socioId);
+  if(!c || !s || !s.tel1) return;
+  const num = s.tel1.replace(/\D/g,'');
+  const msg = encodeURIComponent(`Hola ${s.nombre}, te escribimos de Asociación de familiares del CPRPM Naranco. Quedas convocado/a a la Asamblea ${c.tipo} que se celebrará el ${fechaLarga(c.fecha)} en ${c.lugar||'lugar por determinar'}, a las ${c.hora_primera||'—'}h en primera convocatoria y ${c.hora_segunda||'—'}h en segunda convocatoria. ¡Gracias!`);
+  window.open(`https://wa.me/34${num}?text=${msg}`, '_blank');
+}
+
+// ---------- GASTOS ----------
+let gastos = [];
+async function cargarGastos(){
+  const { data, error } = await db.from('gastos').select('*').order('fecha', {ascending:false});
+  if(error){ showToast('Error cargando gastos: '+error.message); return; }
+  gastos = data;
+  renderGastos();
+}
+function renderGastos(){
+  const total = gastos.reduce((a,g)=>a+Number(g.importe||0),0);
+  const esteMes = mesKey(new Date());
+  const totalMes = gastos.filter(g=>g.fecha && g.fecha.startsWith(esteMes)).reduce((a,g)=>a+Number(g.importe||0),0);
+  document.getElementById('gastosResumen').innerHTML = `
+    <div class="metric"><div class="label">Total histórico</div><div class="value">${euros(total)} €</div></div>
+    <div class="metric"><div class="label">Este mes</div><div class="value">${euros(totalMes)} €</div></div>
+  `;
+  const body = document.querySelector('#tableGastos tbody');
+  body.innerHTML = gastos.length ? gastos.map(g=>`
+    <tr>
+      <td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.proveedor)||'—'}</td>
+      <td>${euros(g.importe)} €</td><td>${escapeHtml(g.documento)||'—'}</td>
+      <td>
+        <button class="icon-btn" onclick="openGastoForm('${g.id}')">Editar</button>
+        <button class="icon-btn" onclick="deleteGasto('${g.id}')">Eliminar</button>
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="6" class="empty">No hay gastos registrados.</td></tr>`;
+}
+function openGastoForm(id){
+  const g = id ? gastos.find(x=>x.id===id) : null;
+  document.getElementById('modalContent').innerHTML = `
+    <h3>${g?'Editar gasto':'Nuevo gasto'}</h3>
+    <div class="grid2">
+      <div class="field"><label>Fecha</label><input type="date" id="f_fecha" value="${g?.fecha||new Date().toISOString().slice(0,10)}"></div>
+      <div class="field"><label>Importe (€)</label><input type="text" id="f_importe" value="${g?.importe||''}"></div>
+    </div>
+    <div class="field"><label>Concepto</label><input type="text" id="f_concepto" value="${escapeAttr(g?.concepto)}"></div>
+    <div class="grid2">
+      <div class="field"><label>Proveedor</label><input type="text" id="f_proveedor" value="${escapeAttr(g?.proveedor)}"></div>
+      <div class="field"><label>Documento justificativo</label><input type="text" id="f_documento" placeholder="Nº factura, referencia..." value="${escapeAttr(g?.documento)}"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn" onclick="saveGasto('${g?g.id:''}')">Guardar</button>
+    </div>
+  `;
+  openModal();
+}
+async function saveGasto(id){
+  const data = {
+    fecha: document.getElementById('f_fecha').value,
+    importe: parseFloat(document.getElementById('f_importe').value)||0,
+    concepto: document.getElementById('f_concepto').value.trim(),
+    proveedor: document.getElementById('f_proveedor').value.trim(),
+    documento: document.getElementById('f_documento').value.trim()
+  };
+  if(!data.concepto || !data.fecha){ showToast('Indica al menos la fecha y el concepto.'); return; }
+  let error;
+  if(id){ ({ error } = await db.from('gastos').update(data).eq('id', id)); }
+  else { ({ error } = await db.from('gastos').insert(data)); }
+  if(error){ showToast('Error al guardar: '+error.message); return; }
+  closeModal();
+  await cargarGastos();
+  showToast('Gasto guardado.');
+}
+async function deleteGasto(id){
+  if(!confirm('¿Eliminar este gasto?')) return;
+  const { error } = await db.from('gastos').delete().eq('id', id);
+  if(error){ showToast('Error al eliminar: '+error.message); return; }
+  await cargarGastos();
+  showToast('Gasto eliminado.');
+}
+
+// ---------- RECIBO ANUAL DE CUOTA ----------
+const MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+async function abrirRecibo(socioId){
+  const s = socios.find(x=>x.id===socioId);
+  if(!s) return;
+  const { data:todasCuotas } = await db.from('cuotas').select('*').eq('socio_id', socioId);
+  const years = [...new Set((todasCuotas||[]).map(c=>c.mes_key.split('-')[0]))].sort().reverse();
+  const currentYear = String(new Date().getFullYear());
+  if(!years.includes(currentYear)) years.unshift(currentYear);
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Recibo anual de cuota — ${escapeHtml(s.nombre)}</h3>
+    <div class="field"><label>Año</label><select id="recibo_anio">
+      ${years.map(y=>`<option value="${y}" ${y===currentYear?'selected':''}>${y}</option>`).join('')}
+    </select></div>
+    <div id="reciboResumen" class="muted" style="margin:10px 0 16px;"></div>
+    <div class="modal-actions" style="justify-content:flex-start; flex-wrap:wrap;">
+      <button class="btn" onclick="imprimirRecibo('${s.id}')">Imprimir / PDF</button>
+      <button class="btn secondary" onclick="enviarReciboWA('${s.id}')" ${!s.tel1?'disabled title="Sin teléfono"':''}>WhatsApp</button>
+      <button class="btn secondary" onclick="enviarReciboEmail('${s.id}')" ${!s.email?'disabled title="Sin email"':''}>Email</button>
+      <button class="btn secondary" onclick="closeModal()">Cerrar</button>
+    </div>
+  `;
+  const actualizarResumen = async ()=>{
+    const anio = document.getElementById('recibo_anio').value;
+    const { pagadas, total } = await datosRecibo(socioId, anio);
+    document.getElementById('reciboResumen').textContent = `${pagadas.length} cuota(s) pagada(s) en ${anio} — Total: ${euros(total)} €`;
+  };
+  document.getElementById('recibo_anio').addEventListener('change', actualizarResumen);
+  actualizarResumen();
+  openModal();
+}
+async function datosRecibo(socioId, anio){
+  const { data } = await db.from('cuotas').select('*').eq('socio_id', socioId).like('mes_key', anio+'-%').order('mes_key');
+  const delAnio = data || [];
+  const pagadas = delAnio.filter(c=>c.estado==='Pagado');
+  const total = pagadas.reduce((a,c)=>a+Number(c.importe||0),0);
+  return { delAnio, pagadas, total };
+}
+async function imprimirRecibo(socioId){
+  const s = socios.find(x=>x.id===socioId);
+  const anio = document.getElementById('recibo_anio').value;
+  const { delAnio, pagadas, total } = await datosRecibo(socioId, anio);
+  const filas = delAnio.map(c=>{
+    const mes = MESES_ES[parseInt(c.mes_key.split('-')[1],10)-1];
+    return `<tr><td>${mes}</td><td>${euros(c.importe)} €</td><td>${c.estado}</td><td>${c.metodo||'—'}</td><td>${c.fecha_pago||'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('printArea').innerHTML = `
+    <h2>Asociación de familiares del CPRPM Naranco</h2>
+    <p class="muted" style="margin:0 0 14px;">Recibo anual de cuota de socio — Año ${anio}</p>
+    <table>
+      <tr><td><strong>Socio</strong></td><td>${escapeHtml(s.nombre)}</td><td><strong>NIF</strong></td><td>${escapeHtml(s.nif)||'—'}</td></tr>
+      <tr><td><strong>Residente</strong></td><td colspan="3">${escapeHtml(s.residente)||'—'}</td></tr>
+    </table>
+    <h3>Detalle de cuotas ${anio}</h3>
+    <table>
+      <tr><th>Mes</th><th>Importe</th><th>Estado</th><th>Método</th><th>Fecha de pago</th></tr>
+      ${filas || '<tr><td colspan="5">Sin cuotas registradas este año.</td></tr>'}
+    </table>
+    <p style="margin-top:14px;"><strong>Total pagado en ${anio}: ${euros(total)} €</strong> (${pagadas.length} cuota(s) pagada(s))</p>
+    <p style="margin-top:18px;">Recibí de D./Dña. <strong>${escapeHtml(s.nombre)}</strong> la cantidad de <strong>${euros(total)} €</strong> en concepto de cuota(s) de socio del año ${anio} de la Asociación de familiares del CPRPM Naranco.</p>
+    <table style="margin-top:20px;"><tr><td style="width:50%;">Fecha: ${new Date().toLocaleDateString('es-ES')}</td><td style="width:50%;">Fdo.: Tesorero/a de la Asociación<br><br>(Firma y sello)</td></tr></table>
+  `;
+  window.print();
+}
+async function enviarReciboWA(socioId){
+  const s = socios.find(x=>x.id===socioId);
+  if(!s || !s.tel1) return;
+  const anio = document.getElementById('recibo_anio').value;
+  const { pagadas, total } = await datosRecibo(socioId, anio);
+  const num = s.tel1.replace(/\D/g,'');
+  const msg = encodeURIComponent(`Hola ${s.nombre}, te escribimos de Asociación de familiares del CPRPM Naranco. Te confirmamos el recibo de tu cuota del año ${anio}: ${pagadas.length} cuota(s) pagada(s), total ${euros(total)} €. Si necesitas el recibo en PDF, dínoslo. ¡Gracias!`);
+  window.open(`https://wa.me/34${num}?text=${msg}`, '_blank');
+}
+async function enviarReciboEmail(socioId){
+  const s = socios.find(x=>x.id===socioId);
+  if(!s || !s.email) return;
+  const anio = document.getElementById('recibo_anio').value;
+  const { pagadas, total } = await datosRecibo(socioId, anio);
+  const asunto = encodeURIComponent(`Recibo cuota de socio ${anio} — Asociación de familiares del CPRPM Naranco`);
+  const cuerpoTexto = `Hola ${s.nombre},\n\nTe confirmamos el recibo de tu cuota de socio del año ${anio}:\n- Cuotas pagadas: ${pagadas.length}\n- Total: ${euros(total)} €\n\nUn saludo,\nAsociación de familiares del CPRPM Naranco`;
+  window.location.href = `mailto:${s.email}?subject=${asunto}&body=${encodeURIComponent(cuerpoTexto)}`;
+}
+
+// ---------- PANEL ----------
+async function renderPanel(){
+  const key = mesKey(new Date());
+  const { data: cuotasMes } = await db.from('cuotas').select('estado').eq('mes_key', key);
+  const { data: incAbiertas } = await db.from('incidencias').select('id').neq('estado','Cerrada');
+  const { data: gastosData } = await db.from('gastos').select('importe');
+  const { data: cuotasPagadasHist } = await db.from('cuotas').select('importe').eq('estado','Pagado');
+  const pagadas = (cuotasMes||[]).filter(c=>c.estado==='Pagado').length;
+  const pendientes = (cuotasMes||[]).filter(c=>c.estado==='Pendiente').length;
+  const lpdPendiente = socios.filter(s=>!s.lpd).length;
+  const totalGastos = (gastosData||[]).reduce((a,g)=>a+Number(g.importe||0),0);
+  const totalCuotasPagadas = (cuotasPagadasHist||[]).reduce((a,c)=>a+Number(c.importe||0),0);
+  const saldo = totalCuotasPagadas - totalGastos;
+  document.getElementById('panelCards').innerHTML = `
+    <div class="metric"><div class="label">Total socios</div><div class="value">${socios.length}</div></div>
+    <div class="metric ok"><div class="label">Cuotas pagadas (mes)</div><div class="value">${pagadas}</div></div>
+    <div class="metric warn"><div class="label">Cuotas pendientes (mes)</div><div class="value">${pendientes}</div></div>
+    <div class="metric warn"><div class="label">LPD sin firmar</div><div class="value">${lpdPendiente}</div></div>
+    <div class="metric"><div class="label">Incidencias abiertas</div><div class="value">${(incAbiertas||[]).length}</div></div>
+    <div class="metric"><div class="label">Saldo histórico</div><div class="value">${euros(saldo)} €</div></div>
+  `;
+}
+
+// ---------- INFORMES DE IMPRESIÓN ----------
+function cabeceraInforme(titulo, subtitulo){
+  return `<h2>Asociación de familiares del CPRPM Naranco</h2>
+    <p class="muted" style="margin:0 0 4px;">${titulo}</p>
+    <p class="muted" style="margin:0 0 14px;">${subtitulo||''} — generado el ${new Date().toLocaleDateString('es-ES')}</p>`;
+}
+function imprimirSocios(){
+  const filas = socios.map(s=>`
+    <tr><td>${s.numero_socio||'—'}</td><td>${escapeHtml(s.nombre)}</td><td>${escapeHtml(s.cargo)||'—'}</td>
+    <td>${escapeHtml(s.nif)||'—'}</td><td>${escapeHtml(s.tel1)||'—'}</td><td>${escapeHtml(s.residente)}</td>
+    <td>${escapeHtml(s.planta)}</td><td>${s.paga_cuota?'Sí':'No'}</td><td>${s.lpd?'Firmado':'Falta'}</td><td>${escapeHtml(s.email)||'—'}</td></tr>
+  `).join('');
+  document.getElementById('printArea').innerHTML = `
+    ${cabeceraInforme('Listado de socios', `${socios.length} socios`)}
+    <table>
+      <tr><th>ID</th><th>Familiar</th><th>Junta</th><th>NIF</th><th>Teléfono</th><th>Residente</th><th>Planta</th><th>Cuota</th><th>LPD</th><th>Email</th></tr>
+      ${filas || '<tr><td colspan="10">Sin resultados.</td></tr>'}
+    </table>
+  `;
+  window.print();
+}
+async function imprimirCuotasInforme(){
+  const key = mesKey(mesActual);
+  const { data } = await db.from('cuotas').select('*, socios(numero_socio, nombre, residente)').eq('mes_key', key);
+  const rows = (data||[]).filter(c=>c.socios).sort((a,b)=>(a.socios.numero_socio||0)-(b.socios.numero_socio||0));
+  const filas = rows.map(c=>`
+    <tr><td>${c.socios.numero_socio||'—'}</td><td>${escapeHtml(c.socios.nombre)}</td><td>${escapeHtml(c.socios.residente)}</td>
+    <td>${euros(c.importe)} €</td><td>${c.estado}</td><td>${c.metodo||'—'}</td><td>${c.fecha_pago||'—'}</td></tr>
+  `).join('');
+  const total = rows.filter(c=>c.estado==='Pagado').reduce((a,c)=>a+Number(c.importe||0),0);
+  document.getElementById('printArea').innerHTML = `
+    ${cabeceraInforme('Informe de cuotas', mesLabel(mesActual))}
+    <table>
+      <tr><th>ID</th><th>Familiar</th><th>Residente</th><th>Importe</th><th>Estado</th><th>Método</th><th>Fecha de pago</th></tr>
+      ${filas || '<tr><td colspan="7">Sin resultados.</td></tr>'}
+    </table>
+    <p style="margin-top:10px;"><strong>Total recaudado: ${euros(total)} €</strong></p>
+  `;
+  window.print();
+}
+function imprimirIncidenciasInforme(){
+  const filas = incidencias.map(i=>`
+    <tr><td>${i.fecha}</td><td>${i.tipo}</td><td>${escapeHtml(i.descripcion)}</td>
+    <td>${escapeHtml(i.residente)||'—'}</td><td>${escapeHtml(i.responsable)||'—'}</td><td>${i.estado}</td></tr>
+  `).join('');
+  document.getElementById('printArea').innerHTML = `
+    ${cabeceraInforme('Listado de incidencias y reuniones', `${incidencias.length} entradas`)}
+    <table>
+      <tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>Residente</th><th>Responsable</th><th>Estado</th></tr>
+      ${filas || '<tr><td colspan="6">Sin resultados.</td></tr>'}
+    </table>
+  `;
+  window.print();
+}
+function imprimirIndiceActas(){
+  const filas = actas.map(a=>{
+    const presentes = Object.values(a.asistencia||{}).filter(v=>v==='presente').length;
+    return `<tr><td>Acta ${a.numero}</td><td>${a.fecha||'—'}</td><td>${a.organo} · ${a.naturaleza}</td><td>${presentes} / ${socios.length}</td><td>${a.estado||'Borrador'}</td></tr>`;
+  }).join('');
+  document.getElementById('printArea').innerHTML = `
+    ${cabeceraInforme('Registro de control de actas (índice general)', `${actas.length} actas`)}
+    <table>
+      <tr><th>Nº de acta</th><th>Fecha de sesión</th><th>Tipo</th><th>Asistentes</th><th>Estado</th></tr>
+      ${filas || '<tr><td colspan="5">Sin resultados.</td></tr>'}
+    </table>
+  `;
+  window.print();
+}
+function imprimirGastosInforme(){
+  const filas = gastos.map(g=>`
+    <tr><td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.proveedor)||'—'}</td>
+    <td>${euros(g.importe)} €</td><td>${escapeHtml(g.documento)||'—'}</td></tr>
+  `).join('');
+  const total = gastos.reduce((a,g)=>a+Number(g.importe||0),0);
+  document.getElementById('printArea').innerHTML = `
+    ${cabeceraInforme('Informe de gastos', `${gastos.length} gastos registrados`)}
+    <table>
+      <tr><th>Fecha</th><th>Concepto</th><th>Proveedor</th><th>Importe</th><th>Documento</th></tr>
+      ${filas || '<tr><td colspan="5">Sin resultados.</td></tr>'}
+    </table>
+    <p style="margin-top:10px;"><strong>Total: ${euros(total)} €</strong></p>
+  `;
+  window.print();
 }
 
 // ---------- MODAL ----------
