@@ -66,6 +66,11 @@
   .pill{ display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
   .pill.si{ background:var(--green-ok-bg); color:var(--green-ok); }
   .pill.no{ background:var(--brick-100); color:var(--brick); }
+  .metric{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow); }
+  .metric .label{ font-size:12px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; }
+  .metric .value{ font-family:'Fraunces',serif; font-size:24px; color:var(--teal-900); margin-top:2px; }
+  .metric.warn .value{ color:var(--brick); }
+  .metric.ok .value{ color:var(--green-ok); }
 
   .modal-bg{ display:none; position:fixed; inset:0; background:rgba(30,54,52,.45); align-items:center; justify-content:center; z-index:50; padding:16px; }
   .modal-bg.open{ display:flex; }
@@ -124,7 +129,7 @@
 
   <nav class="tabs">
     <button data-tab="socios" class="active">Socios</button>
-    <button disabled title="Próximamente en la siguiente fase">Cuotas</button>
+    <button data-tab="cuotas">Cuotas</button>
     <button disabled title="Próximamente en la siguiente fase">Incidencias</button>
     <button disabled title="Próximamente en la siguiente fase">Actas</button>
     <button disabled title="Próximamente en la siguiente fase">Convocatorias</button>
@@ -142,6 +147,22 @@
       </div>
       <div class="card"><div class="tablewrap"><table id="tableSocios">
         <thead><tr><th>ID</th><th>Familiar</th><th>Junta</th><th>NIF</th><th>Teléfono</th><th>Residente</th><th>Planta</th><th>Cuota</th><th>LPD</th><th>Email</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div></div>
+    </section>
+
+    <section class="panel" id="tab-cuotas">
+      <div class="section-title">
+        <h2>Cuotas mensuales</h2>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span id="cuotaMesLabel" class="muted" style="min-width:140px;"></span>
+          <button class="btn secondary" onclick="cambiarMes(-1)">← Mes anterior</button>
+          <button class="btn secondary" onclick="cambiarMes(1)">Mes siguiente →</button>
+        </div>
+      </div>
+      <div class="cards" id="cuotasResumen" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px;"></div>
+      <div class="card"><div class="tablewrap"><table id="tableCuotas">
+        <thead><tr><th>ID</th><th>Familiar</th><th>Residente</th><th>Importe (€)</th><th>Estado</th><th>Método</th><th>Fecha pago</th><th></th></tr></thead>
         <tbody></tbody>
       </table></div></div>
     </section>
@@ -199,6 +220,7 @@ async function mostrarApp(session){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appRoot').style.display='block';
   document.getElementById('userEmail').textContent = session.user.email;
+  await cargarAjustes();
   await cargarSocios();
 }
 
@@ -209,6 +231,7 @@ document.querySelectorAll('nav.tabs button[data-tab]').forEach(btn=>{
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='cuotas') cargarCuotas();
   });
 });
 
@@ -302,6 +325,86 @@ async function deleteSocio(id){
   if(error){ showToast('Error al eliminar: '+error.message); return; }
   await cargarSocios();
   showToast('Socio eliminado.');
+}
+
+// ---------- CUOTAS ----------
+let mesActual = new Date();
+let cuotaDefecto = 10;
+function mesKey(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
+function mesLabel(d){ return d.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase()); }
+function euros(n){ return (Math.round((n||0)*100)/100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+async function cargarAjustes(){
+  const { data } = await db.from('ajustes').select('*').eq('id',1).single();
+  if(data) cuotaDefecto = data.cuota_defecto || 10;
+}
+function cambiarMes(delta){
+  mesActual.setMonth(mesActual.getMonth()+delta);
+  cargarCuotas();
+}
+async function ensureCuotasMes(){
+  const key = mesKey(mesActual);
+  const pagan = socios.filter(s=>s.paga_cuota);
+  if(!pagan.length) return;
+  const filas = pagan.map(s=>({ socio_id:s.id, mes_key:key, importe:cuotaDefecto, estado:'Pendiente' }));
+  await db.from('cuotas').upsert(filas, { onConflict:'socio_id,mes_key', ignoreDuplicates:true });
+}
+async function cargarCuotas(){
+  document.getElementById('cuotaMesLabel').textContent = mesLabel(mesActual);
+  await ensureCuotasMes();
+  const key = mesKey(mesActual);
+  const { data, error } = await db.from('cuotas')
+    .select('*, socios(id, numero_socio, nombre, residente, tel1)')
+    .eq('mes_key', key);
+  if(error){ showToast('Error cargando cuotas: '+error.message); return; }
+  const rows = (data||[]).filter(c=>c.socios).sort((a,b)=>(a.socios.numero_socio||0)-(b.socios.numero_socio||0));
+  renderCuotas(rows);
+}
+function renderCuotas(rows){
+  const pagadas = rows.filter(c=>c.estado==='Pagado');
+  const pendientes = rows.filter(c=>c.estado==='Pendiente');
+  const total = pagadas.reduce((a,c)=>a+Number(c.importe||0),0);
+  document.getElementById('cuotasResumen').innerHTML = `
+    <div class="metric ok"><div class="label">Pagadas</div><div class="value">${pagadas.length}</div></div>
+    <div class="metric warn"><div class="label">Pendientes</div><div class="value">${pendientes.length}</div></div>
+    <div class="metric"><div class="label">Recaudado este mes</div><div class="value">${euros(total)} €</div></div>
+  `;
+  const body = document.querySelector('#tableCuotas tbody');
+  body.innerHTML = rows.length ? rows.map(c=>`
+    <tr>
+      <td>${c.socios.numero_socio||'—'}</td>
+      <td>${escapeHtml(c.socios.nombre)}</td>
+      <td>${escapeHtml(c.socios.residente)}</td>
+      <td><input type="text" style="width:80px" value="${c.importe}" onchange="updateCuota('${c.id}',{importe:parseFloat(this.value)||0})"></td>
+      <td>
+        <select onchange="updateCuota('${c.id}',{estado:this.value})">
+          <option value="Pendiente" ${c.estado==='Pendiente'?'selected':''}>Pendiente</option>
+          <option value="Pagado" ${c.estado==='Pagado'?'selected':''}>Pagado</option>
+          <option value="Exento" ${c.estado==='Exento'?'selected':''}>Exento</option>
+        </select>
+      </td>
+      <td>
+        <select onchange="updateCuota('${c.id}',{metodo:this.value})">
+          <option value="" ${!c.metodo?'selected':''}>—</option>
+          <option value="Efectivo" ${c.metodo==='Efectivo'?'selected':''}>Efectivo</option>
+          <option value="Transferencia" ${c.metodo==='Transferencia'?'selected':''}>Transferencia</option>
+          <option value="Domiciliación" ${c.metodo==='Domiciliación'?'selected':''}>Domiciliación</option>
+        </select>
+      </td>
+      <td><input type="text" placeholder="AAAA-MM-DD" style="width:110px" value="${c.fecha_pago||''}" onchange="updateCuota('${c.id}',{fecha_pago:this.value||null})"></td>
+      <td>${c.estado==='Pendiente' && c.socios.tel1 ? `<button class="icon-btn" onclick="reclamarWA('${escapeAttr(c.socios.tel1)}','${escapeAttr(c.socios.nombre)}',${c.importe})">WhatsApp</button>` : ''}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">No hay cuotas este mes.</td></tr>`;
+}
+async function updateCuota(id, patch){
+  const { error } = await db.from('cuotas').update(patch).eq('id', id);
+  if(error){ showToast('Error al guardar: '+error.message); return; }
+  await cargarCuotas();
+}
+function reclamarWA(tel, nombre, importe){
+  const num = tel.replace(/\D/g,'');
+  const msg = encodeURIComponent(`Hola ${nombre}, te escribimos de Asociación de familiares del CPRPM Naranco para recordarte el pago de la cuota de ${mesLabel(mesActual)} (${euros(importe)} €). ¡Gracias!`);
+  window.open(`https://wa.me/34${num}?text=${msg}`, '_blank');
 }
 
 // ---------- MODAL ----------
