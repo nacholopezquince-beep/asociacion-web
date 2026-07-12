@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<!-- saved from url=(0048)file:///C:/Users/Usuario/Downloads/index_19.html -->
-<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="es">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Asociación de familiares del CPRPM Naranco</title>
-<link rel="preconnect" href="https://fonts.googleapis.com/">
-<link rel="stylesheet" href="./index_files/css2">
-<script src="./index_files/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --teal-900:#1E3634; --teal-700:#2B4A47; --teal-600:#365E5A; --teal-100:#E4EEEC;
@@ -113,7 +113,7 @@
 <body>
 
 <!-- ===== PANTALLA DE LOGIN ===== -->
-<div id="loginScreen" style="display: none;">
+<div id="loginScreen">
   <div class="login-card">
     <div class="leaf">A</div>
     <h1>Asociación de familiares del CPRPM Naranco</h1>
@@ -128,7 +128,7 @@
 </div>
 
 <!-- ===== APP ===== -->
-<div class="app" id="appRoot" style="display: block;">
+<div class="app" id="appRoot" style="display:none;">
   <header class="top">
     <div class="brand">
       <div class="leaf">A</div>
@@ -138,7 +138,7 @@
       </div>
     </div>
     <div class="userbox">
-      <span id="userEmail">nacholopezquince@gmail.com</span>
+      <span id="userEmail"></span>
       <button class="btn secondary" onclick="cerrarSesion()">Cerrar sesión</button>
     </div>
   </header>
@@ -157,14 +157,7 @@
   <main>
     <section class="panel active" id="tab-panel">
       <div class="section-title"><h2>Panel</h2></div>
-      <div class="cards" id="panelCards" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px;">
-    <div class="metric"><div class="label">Total socios</div><div class="value">35</div></div>
-    <div class="metric ok"><div class="label">Cuotas pagadas (mes)</div><div class="value">0</div></div>
-    <div class="metric warn"><div class="label">Cuotas pendientes (mes)</div><div class="value">26</div></div>
-    <div class="metric warn"><div class="label">LPD sin firmar</div><div class="value">10</div></div>
-    <div class="metric"><div class="label">Incidencias abiertas</div><div class="value">0</div></div>
-    <div class="metric"><div class="label">Saldo histórico</div><div class="value">0,00 €</div></div>
-  </div>
+      <div class="cards" id="panelCards" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px;"></div>
     </section>
 
     <section class="panel" id="tab-socios">
@@ -180,637 +173,7 @@
       </div>
       <div class="card"><div class="tablewrap"><table id="tableSocios">
         <thead><tr><th>ID</th><th>Familiar</th><th>Junta</th><th>NIF</th><th>Teléfono</th><th>Residente</th><th>Planta</th><th>Cuota</th><th>LPD</th><th>Email</th><th></th></tr></thead>
-        <tbody>
-    <tr>
-      <td>1</td>
-      <td>Eduardo Fuente del Río</td>
-      <td><span class="muted">—</span></td>
-      <td>10560814L</td>
-      <td>669343435</td>
-      <td>PAQUITA</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;44bc8f65-53f5-4adf-a5fd-6c6d99e8c516&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;44bc8f65-53f5-4adf-a5fd-6c6d99e8c516&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;44bc8f65-53f5-4adf-a5fd-6c6d99e8c516&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>2</td>
-      <td>Julia Fernández Díaz</td>
-      <td><span class="muted">—</span></td>
-      <td>10557148X</td>
-      <td>629591166</td>
-      <td>COVADONGA</td>
-      <td>2</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;b055de25-2c85-4ab2-a91e-303caa0b0a38&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;b055de25-2c85-4ab2-a91e-303caa0b0a38&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;b055de25-2c85-4ab2-a91e-303caa0b0a38&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>3</td>
-      <td>Esperanza Alonso Suárez</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>673462806</td>
-      <td>ALICIA</td>
-      <td>2</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;f56a8110-a8d1-4573-90b7-adde76e04018&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;f56a8110-a8d1-4573-90b7-adde76e04018&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;f56a8110-a8d1-4573-90b7-adde76e04018&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>4</td>
-      <td>María Fe Suárez González</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>692191188</td>
-      <td>FINA</td>
-      <td>1</td>
-      <td><span class="pill no">No</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;ee3f8079-f5cf-46ce-89b2-5c06ac1d7a54&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;ee3f8079-f5cf-46ce-89b2-5c06ac1d7a54&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;ee3f8079-f5cf-46ce-89b2-5c06ac1d7a54&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>5</td>
-      <td>María Rosa Moya Aranzubía</td>
-      <td><span class="muted">—</span></td>
-      <td>13143001L</td>
-      <td>669117976</td>
-      <td>OLGA</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;68b8c8ab-cf8d-4bc3-9cd1-0212e90fd2a3&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;68b8c8ab-cf8d-4bc3-9cd1-0212e90fd2a3&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;68b8c8ab-cf8d-4bc3-9cd1-0212e90fd2a3&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>6</td>
-      <td>Fernando Muñiz Heras</td>
-      <td><span class="muted">—</span></td>
-      <td>09395610H</td>
-      <td>649961637</td>
-      <td>TERESA</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;fa0af324-40e2-4669-bc5e-1171dd29416d&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;fa0af324-40e2-4669-bc5e-1171dd29416d&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;fa0af324-40e2-4669-bc5e-1171dd29416d&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>7</td>
-      <td>Mercedes Suárez Urdangaray</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>638808247</td>
-      <td>MERCEDES</td>
-      <td>-1</td>
-      <td><span class="pill no">No</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;6d94babf-6b9c-4fec-ae17-1cc203f5d306&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;6d94babf-6b9c-4fec-ae17-1cc203f5d306&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;6d94babf-6b9c-4fec-ae17-1cc203f5d306&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>8</td>
-      <td>Roberto Cuesta Álvarez</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>655862035</td>
-      <td>CHITA</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill no">Falta</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;549adb59-80ea-4c62-87ed-77fa4d0e75b8&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;549adb59-80ea-4c62-87ed-77fa4d0e75b8&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;549adb59-80ea-4c62-87ed-77fa4d0e75b8&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>9</td>
-      <td>Berta Argüelles Alonso</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>636269741</td>
-      <td>BERTA</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;788be524-deb0-423a-8e9b-003435cede87&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;788be524-deb0-423a-8e9b-003435cede87&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;788be524-deb0-423a-8e9b-003435cede87&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>10</td>
-      <td>José A. Gil Martín</td>
-      <td><span class="muted">—</span></td>
-      <td>10567109N</td>
-      <td>629548231</td>
-      <td>CARLOS</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;cce781b4-7043-4899-b17f-6fb96770a4b1&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;cce781b4-7043-4899-b17f-6fb96770a4b1&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;cce781b4-7043-4899-b17f-6fb96770a4b1&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>11</td>
-      <td>Mª Victoria Fernández Díaz</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>619081932</td>
-      <td>VIOLETA</td>
-      <td>2</td>
-      <td><span class="pill no">No</span></td>
-      <td><span class="pill no">Falta</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;206e8e07-7646-449e-9830-db9e1591d7f2&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;206e8e07-7646-449e-9830-db9e1591d7f2&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;206e8e07-7646-449e-9830-db9e1591d7f2&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>12</td>
-      <td>Susana Fernández Guisasola</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>679255457</td>
-      <td>ELOISA</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;6bb1e81c-6e98-4217-a7b0-921ce76f483c&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;6bb1e81c-6e98-4217-a7b0-921ce76f483c&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;6bb1e81c-6e98-4217-a7b0-921ce76f483c&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>13</td>
-      <td>Mª Carmen Fernández González</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>678336234</td>
-      <td>MARSI</td>
-      <td>1</td>
-      <td><span class="pill no">No</span></td>
-      <td><span class="pill no">Falta</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;81951f4e-3d95-4798-bf5f-9e492f0d9d23&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;81951f4e-3d95-4798-bf5f-9e492f0d9d23&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;81951f4e-3d95-4798-bf5f-9e492f0d9d23&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>14</td>
-      <td>Margarita Santos Ferrera</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>660044455</td>
-      <td>MARGARITA</td>
-      <td>0</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill no">Falta</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;68c44180-6465-46a2-9c04-ae712200e764&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;68c44180-6465-46a2-9c04-ae712200e764&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;68c44180-6465-46a2-9c04-ae712200e764&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>15</td>
-      <td>Isabel García Alonso</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>679239843</td>
-      <td>SOLEDAD</td>
-      <td>2</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;de6ee2fa-a43e-433a-bcf7-95c0e7024639&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;de6ee2fa-a43e-433a-bcf7-95c0e7024639&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;de6ee2fa-a43e-433a-bcf7-95c0e7024639&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>16</td>
-      <td>Susana Cuesta Suárez</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>636350710</td>
-      <td>CARMEN ESTHER</td>
-      <td>2</td>
-      <td><span class="pill no">No</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;7ce61a0d-aef1-4e28-9ab2-c32d098bc3fa&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;7ce61a0d-aef1-4e28-9ab2-c32d098bc3fa&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;7ce61a0d-aef1-4e28-9ab2-c32d098bc3fa&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>17</td>
-      <td>Julia Menéndez García</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>620451851</td>
-      <td>ANTONIO</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;4c1cc62c-cd7b-4ec0-aa46-0610e1d0d875&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;4c1cc62c-cd7b-4ec0-aa46-0610e1d0d875&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;4c1cc62c-cd7b-4ec0-aa46-0610e1d0d875&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>18</td>
-      <td>Lola de la Rosa Fernández</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>696666332</td>
-      <td>CÁNDIDA RAQUEL</td>
-      <td>2</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;f4fb63cd-1e5a-4756-b9b5-ca547ba63fe2&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;f4fb63cd-1e5a-4756-b9b5-ca547ba63fe2&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;f4fb63cd-1e5a-4756-b9b5-ca547ba63fe2&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>19</td>
-      <td>David Mérida Fernández</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>626941423</td>
-      <td>JOSÉ MÉRIDA</td>
-      <td>0</td>
-      <td><span class="pill no">No</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;316daf8d-7f8f-45f8-9c2e-737505726b3a&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;316daf8d-7f8f-45f8-9c2e-737505726b3a&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;316daf8d-7f8f-45f8-9c2e-737505726b3a&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>20</td>
-      <td>Mª Teresa Ríos Argüelles</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>677606114</td>
-      <td>TERESA</td>
-      <td>0</td>
-      <td><span class="pill no">No</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;5ffd7f4c-5005-45ba-9b8e-cd46dd924095&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;5ffd7f4c-5005-45ba-9b8e-cd46dd924095&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;5ffd7f4c-5005-45ba-9b8e-cd46dd924095&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>21</td>
-      <td>Vicky Parada Arroyo</td>
-      <td><span class="muted">—</span></td>
-      <td>53136980B</td>
-      <td>667351390</td>
-      <td>JUSTY</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;3cb0e4d4-2e5b-4bbd-b54a-0038629e4958&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;3cb0e4d4-2e5b-4bbd-b54a-0038629e4958&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;3cb0e4d4-2e5b-4bbd-b54a-0038629e4958&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>22</td>
-      <td>Marlen Valledor Nieto</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>666765543</td>
-      <td>ELENA NIETO</td>
-      <td>1</td>
-      <td><span class="pill no">No</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;6c43fbbb-2448-4c36-a6cb-b49b594aea4a&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;6c43fbbb-2448-4c36-a6cb-b49b594aea4a&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;6c43fbbb-2448-4c36-a6cb-b49b594aea4a&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>23</td>
-      <td>Nicolás Antonio Crespo Otero</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>687810633</td>
-      <td>TERESA OTERO</td>
-      <td>2</td>
-      <td><span class="pill no">No</span></td>
-      <td><span class="pill no">Falta</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;7d01d5bd-82cb-4c85-b499-68d71063d80b&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;7d01d5bd-82cb-4c85-b499-68d71063d80b&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;7d01d5bd-82cb-4c85-b499-68d71063d80b&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>24</td>
-      <td>Celia Fernández González</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>691581189</td>
-      <td>CELIA CASTAÑÓN</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;bebde128-3fee-487f-ad2e-c6b409129430&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;bebde128-3fee-487f-ad2e-c6b409129430&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;bebde128-3fee-487f-ad2e-c6b409129430&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>25</td>
-      <td>Marta C. Fernández González</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>658031560</td>
-      <td>FLOR</td>
-      <td>0</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill no">Falta</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;cb313e4f-f177-439e-b3ec-a347e78a9b14&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;cb313e4f-f177-439e-b3ec-a347e78a9b14&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;cb313e4f-f177-439e-b3ec-a347e78a9b14&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>26</td>
-      <td>Luis Ignacio López Quince</td>
-      <td><span class="muted">—</span></td>
-      <td>09439116P</td>
-      <td>600605600</td>
-      <td>ROSARIO</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;e7c4324c-66f0-4657-98eb-9d8669d490d1&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;e7c4324c-66f0-4657-98eb-9d8669d490d1&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;e7c4324c-66f0-4657-98eb-9d8669d490d1&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>27</td>
-      <td>Dulce Mª Pérez Acebo</td>
-      <td><span class="muted">—</span></td>
-      <td>09363510A</td>
-      <td>677791578</td>
-      <td>LUCIO LUIS</td>
-      <td>0</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;cbd84c1d-3dfe-4f29-a972-40bd5d979d90&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;cbd84c1d-3dfe-4f29-a972-40bd5d979d90&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;cbd84c1d-3dfe-4f29-a972-40bd5d979d90&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>28</td>
-      <td>Fernando Penin Cordevi</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>635786467</td>
-      <td>AVELINA</td>
-      <td>2</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;a8059c16-9191-499d-8e92-bb6621f76545&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;a8059c16-9191-499d-8e92-bb6621f76545&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;a8059c16-9191-499d-8e92-bb6621f76545&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>29</td>
-      <td>Mari Fé Suárez González</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>692191188</td>
-      <td>JOSEFA GONZÁLEZ</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill no">Falta</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;2a32cad4-6596-48cb-8370-cec91d4e6513&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;2a32cad4-6596-48cb-8370-cec91d4e6513&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;2a32cad4-6596-48cb-8370-cec91d4e6513&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>30</td>
-      <td>Pilar Menéndez Villar</td>
-      <td><span class="muted">—</span></td>
-      <td>002601455</td>
-      <td>691075522</td>
-      <td>MERCEDES</td>
-      <td>2</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;8cfd2fa2-5247-4d8c-8c07-39548228ddca&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;8cfd2fa2-5247-4d8c-8c07-39548228ddca&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;8cfd2fa2-5247-4d8c-8c07-39548228ddca&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>31</td>
-      <td>Alberto García Suárez</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>659629262 / 985241479</td>
-      <td>ALBERTO</td>
-      <td>2</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;545c9e8f-1c40-4fc0-bdd1-6de0a2c7563a&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;545c9e8f-1c40-4fc0-bdd1-6de0a2c7563a&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;545c9e8f-1c40-4fc0-bdd1-6de0a2c7563a&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>32</td>
-      <td>Laura Jubete Pérez</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>676088887</td>
-      <td>JULIA</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill si">Firmado</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;96d2a867-3b26-4638-a0b5-92650d8a4ec6&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;96d2a867-3b26-4638-a0b5-92650d8a4ec6&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;96d2a867-3b26-4638-a0b5-92650d8a4ec6&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>33</td>
-      <td>Manuel García Viejo</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>660557340</td>
-      <td>PURIFICACIÓN</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill no">Falta</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;aa0ddfd6-1bdb-4b8e-9a32-c7153fc1e8fb&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;aa0ddfd6-1bdb-4b8e-9a32-c7153fc1e8fb&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;aa0ddfd6-1bdb-4b8e-9a32-c7153fc1e8fb&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>34</td>
-      <td>David Merida Fernández</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>626941423</td>
-      <td>JOSÉ MERIDA</td>
-      <td>0</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill no">Falta</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;0d5c419b-9ec0-4fbc-b185-31213f3d91f9&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;0d5c419b-9ec0-4fbc-b185-31213f3d91f9&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;0d5c419b-9ec0-4fbc-b185-31213f3d91f9&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  
-    <tr>
-      <td>35</td>
-      <td>Celio Fernández González</td>
-      <td><span class="muted">—</span></td>
-      <td>—</td>
-      <td>691458118</td>
-      <td>CELIO CASTAÑÓN</td>
-      <td>1</td>
-      <td><span class="pill si">Sí</span></td>
-      <td><span class="pill no">Falta</span></td>
-      <td>—</td>
-      <td>
-        <button class="icon-btn" onclick="openSocioForm(&#39;a12d5409-1c43-4dd9-bd47-1e5bfa2ddc6c&#39;)">Editar</button>
-        <button class="icon-btn" onclick="abrirRecibo(&#39;a12d5409-1c43-4dd9-bd47-1e5bfa2ddc6c&#39;)">Recibo</button>
-        <button class="icon-btn" onclick="deleteSocio(&#39;a12d5409-1c43-4dd9-bd47-1e5bfa2ddc6c&#39;)">Eliminar</button>
-      </td>
-    </tr>
-  </tbody>
+        <tbody></tbody>
       </table></div></div>
     </section>
 
@@ -905,9 +268,7 @@
           <datalist id="listaJunta"></datalist>
           <div class="field">
             <label>Orden del día (un punto por línea)</label>
-            <textarea id="a_ordenDia" rows="4" style="width:100%; font-family:&#39;Inter&#39;,sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;" placeholder="Lectura y aprobación del acta anterior
-Balance económico
-Ruegos y preguntas"></textarea>
+            <textarea id="a_ordenDia" rows="4" style="width:100%; font-family:'Inter',sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;" placeholder="Lectura y aprobación del acta anterior&#10;Balance económico&#10;Ruegos y preguntas"></textarea>
           </div>
         </div>
 
@@ -925,7 +286,7 @@ Ruegos y preguntas"></textarea>
         <div class="card" style="margin-bottom:16px;">
           <h3 style="margin-bottom:12px;">Desarrollo de la reunión</h3>
           <div class="field"><label>Deliberaciones</label>
-            <textarea id="a_desarrollo" rows="5" style="width:100%; font-family:&#39;Inter&#39;,sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;"></textarea>
+            <textarea id="a_desarrollo" rows="5" style="width:100%; font-family:'Inter',sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;"></textarea>
           </div>
           <div class="field">
             <label>Acuerdos adoptados</label>
@@ -936,7 +297,7 @@ Ruegos y preguntas"></textarea>
             <button type="button" class="btn secondary" style="margin-top:8px; padding:6px 12px; font-size:12.5px;" onclick="addAcuerdo()">+ Añadir acuerdo</button>
           </div>
           <div class="field"><label>Ruegos y preguntas</label>
-            <textarea id="a_ruegos" rows="3" style="width:100%; font-family:&#39;Inter&#39;,sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;"></textarea>
+            <textarea id="a_ruegos" rows="3" style="width:100%; font-family:'Inter',sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;"></textarea>
           </div>
         </div>
 
@@ -1002,9 +363,7 @@ Ruegos y preguntas"></textarea>
           </div>
           <div class="field">
             <label>Orden del día (un punto por línea)</label>
-            <textarea id="cv_ordenDia" rows="4" style="width:100%; font-family:&#39;Inter&#39;,sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;" placeholder="Lectura y, si procede, aprobación del acta anterior.
-Informe anual de actividades.
-Ruegos y preguntas."></textarea>
+            <textarea id="cv_ordenDia" rows="4" style="width:100%; font-family:'Inter',sans-serif; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:7px;" placeholder="Lectura y, si procede, aprobación del acta anterior.&#10;Informe anual de actividades.&#10;Ruegos y preguntas."></textarea>
           </div>
           <div class="grid2">
             <div class="field"><label>Ciudad de emisión</label><input type="text" id="cv_ciudad" placeholder="Oviedo"></div>
@@ -1067,7 +426,7 @@ Ruegos y preguntas."></textarea>
 <div class="modal-bg" id="modalBg"><div class="modal" id="modalContent"></div></div>
 <div class="toast" id="toast"></div>
 
-<script src="./index_files/config.js"></script>
+<script src="config.js"></script>
 <script>
 let db = null;
 let socios = [];
@@ -2014,6 +1373,5 @@ function openModal(){ document.getElementById('modalBg').classList.add('open'); 
 function closeModal(){ document.getElementById('modalBg').classList.remove('open'); }
 document.getElementById('modalBg').addEventListener('click', e=>{ if(e.target.id==='modalBg') closeModal(); });
 </script>
-
-
-</body></html>
+</body>
+</html>
