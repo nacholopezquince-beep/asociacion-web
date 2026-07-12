@@ -181,9 +181,9 @@
       <div class="section-title">
         <h2>Cuotas mensuales</h2>
         <div style="display:flex; gap:8px; align-items:center;">
-          <span id="cuotaMesLabel" class="muted" style="min-width:140px;"></span>
-          <button class="btn secondary" onclick="cambiarMes(-1)">← Mes anterior</button>
-          <button class="btn secondary" onclick="cambiarMes(1)">Mes siguiente →</button>
+          <span id="cuotaAnioLabel" class="muted" style="min-width:60px;"></span>
+          <button class="btn secondary" onclick="cambiarAnio(-1)">← Año anterior</button>
+          <button class="btn secondary" onclick="cambiarAnio(1)">Año siguiente →</button>
           <button class="btn secondary" onclick="imprimirCuotasInforme()">Imprimir</button>
         </div>
       </div>
@@ -590,6 +590,7 @@ async function deleteSocio(id){
 
 // ---------- CUOTAS ----------
 let mesActual = new Date();
+let anioActual = new Date().getFullYear();
 let cuotaDefecto = 10;
 function mesKey(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
 function mesLabel(d){ return d.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase()); }
@@ -599,21 +600,21 @@ async function cargarAjustes(){
   const { data } = await db.from('ajustes').select('*').eq('id',1).single();
   if(data) cuotaDefecto = data.cuota_defecto || 10;
 }
-function cambiarMes(delta){
-  mesActual.setMonth(mesActual.getMonth()+delta);
+function cambiarAnio(delta){
+  anioActual += delta;
   cargarCuotas();
 }
-async function ensureCuotasMes(){
-  const key = mesKey(mesActual);
+async function ensureCuotaAnio(){
+  const key = String(anioActual);
   const pagan = socios.filter(s=>s.paga_cuota);
   if(!pagan.length) return;
   const filas = pagan.map(s=>({ socio_id:s.id, mes_key:key, importe:cuotaDefecto, estado:'Pendiente' }));
   await db.from('cuotas').upsert(filas, { onConflict:'socio_id,mes_key', ignoreDuplicates:true });
 }
 async function cargarCuotas(){
-  document.getElementById('cuotaMesLabel').textContent = mesLabel(mesActual);
-  await ensureCuotasMes();
-  const key = mesKey(mesActual);
+  document.getElementById('cuotaAnioLabel').textContent = anioActual;
+  await ensureCuotaAnio();
+  const key = String(anioActual);
   const { data, error } = await db.from('cuotas')
     .select('*, socios(id, numero_socio, nombre, residente, tel1)')
     .eq('mes_key', key);
@@ -628,7 +629,7 @@ function renderCuotas(rows){
   document.getElementById('cuotasResumen').innerHTML = `
     <div class="metric ok"><div class="label">Pagadas</div><div class="value">${pagadas.length}</div></div>
     <div class="metric warn"><div class="label">Pendientes</div><div class="value">${pendientes.length}</div></div>
-    <div class="metric"><div class="label">Recaudado este mes</div><div class="value">${euros(total)} €</div></div>
+    <div class="metric"><div class="label">Recaudado en ${anioActual}</div><div class="value">${euros(total)} €</div></div>
   `;
   const body = document.querySelector('#tableCuotas tbody');
   body.innerHTML = rows.length ? rows.map(c=>`
@@ -655,7 +656,7 @@ function renderCuotas(rows){
       <td><input type="text" placeholder="AAAA-MM-DD" style="width:110px" value="${c.fecha_pago||''}" onchange="updateCuota('${c.id}',{fecha_pago:this.value||null})"></td>
       <td>${c.estado==='Pendiente' && c.socios.tel1 ? `<button class="icon-btn" onclick="reclamarWA('${escapeAttr(c.socios.tel1)}','${escapeAttr(c.socios.nombre)}',${c.importe})">WhatsApp</button>` : ''}</td>
     </tr>
-  `).join('') : `<tr><td colspan="8" class="empty">No hay cuotas este mes.</td></tr>`;
+  `).join('') : `<tr><td colspan="8" class="empty">No hay cuotas registradas para este año.</td></tr>`;
 }
 async function updateCuota(id, patch){
   const { error } = await db.from('cuotas').update(patch).eq('id', id);
@@ -664,7 +665,7 @@ async function updateCuota(id, patch){
 }
 function reclamarWA(tel, nombre, importe){
   const num = tel.replace(/\D/g,'');
-  const msg = encodeURIComponent(`Hola ${nombre}, te escribimos de Asociación de familiares del CPRPM Naranco para recordarte el pago de la cuota de ${mesLabel(mesActual)} (${euros(importe)} €). ¡Gracias!`);
+  const msg = encodeURIComponent(`Hola ${nombre}, te escribimos de Asociación de familiares del CPRPM Naranco para recordarte el pago de la cuota anual de ${anioActual} (${euros(importe)} €). ¡Gracias!`);
   window.open(`https://wa.me/34${num}?text=${msg}`, '_blank');
 }
 
@@ -1178,12 +1179,11 @@ async function deleteGasto(id){
 }
 
 // ---------- RECIBO ANUAL DE CUOTA ----------
-const MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 async function abrirRecibo(socioId){
   const s = socios.find(x=>x.id===socioId);
   if(!s) return;
   const { data:todasCuotas } = await db.from('cuotas').select('*').eq('socio_id', socioId);
-  const years = [...new Set((todasCuotas||[]).map(c=>c.mes_key.split('-')[0]))].sort().reverse();
+  const years = [...new Set((todasCuotas||[]).map(c=>c.mes_key))].sort().reverse();
   const currentYear = String(new Date().getFullYear());
   if(!years.includes(currentYear)) years.unshift(currentYear);
   document.getElementById('modalContent').innerHTML = `
@@ -1201,28 +1201,25 @@ async function abrirRecibo(socioId){
   `;
   const actualizarResumen = async ()=>{
     const anio = document.getElementById('recibo_anio').value;
-    const { pagadas, total } = await datosRecibo(socioId, anio);
-    document.getElementById('reciboResumen').textContent = `${pagadas.length} cuota(s) pagada(s) en ${anio} — Total: ${euros(total)} €`;
+    const { cuota } = await datosRecibo(socioId, anio);
+    document.getElementById('reciboResumen').textContent = cuota
+      ? `Cuota ${anio}: ${cuota.estado} — ${euros(cuota.importe)} €`
+      : `Todavía no hay cuota registrada para ${anio}.`;
   };
   document.getElementById('recibo_anio').addEventListener('change', actualizarResumen);
   actualizarResumen();
   openModal();
 }
 async function datosRecibo(socioId, anio){
-  const { data } = await db.from('cuotas').select('*').eq('socio_id', socioId).like('mes_key', anio+'-%').order('mes_key');
-  const delAnio = data || [];
-  const pagadas = delAnio.filter(c=>c.estado==='Pagado');
-  const total = pagadas.reduce((a,c)=>a+Number(c.importe||0),0);
-  return { delAnio, pagadas, total };
+  const { data } = await db.from('cuotas').select('*').eq('socio_id', socioId).eq('mes_key', String(anio)).maybeSingle();
+  const cuota = data || null;
+  const total = (cuota && cuota.estado==='Pagado') ? Number(cuota.importe||0) : 0;
+  return { cuota, total };
 }
 async function imprimirRecibo(socioId){
   const s = socios.find(x=>x.id===socioId);
   const anio = document.getElementById('recibo_anio').value;
-  const { delAnio, pagadas, total } = await datosRecibo(socioId, anio);
-  const filas = delAnio.map(c=>{
-    const mes = MESES_ES[parseInt(c.mes_key.split('-')[1],10)-1];
-    return `<tr><td>${mes}</td><td>${euros(c.importe)} €</td><td>${c.estado}</td><td>${c.metodo||'—'}</td><td>${c.fecha_pago||'—'}</td></tr>`;
-  }).join('');
+  const { cuota, total } = await datosRecibo(socioId, anio);
   document.getElementById('printArea').innerHTML = `
     <h2>Asociación de familiares del CPRPM Naranco</h2>
     <p class="muted" style="margin:0 0 14px;">Recibo anual de cuota de socio — Año ${anio}</p>
@@ -1230,13 +1227,12 @@ async function imprimirRecibo(socioId){
       <tr><td><strong>Socio</strong></td><td>${escapeHtml(s.nombre)}</td><td><strong>NIF</strong></td><td>${escapeHtml(s.nif)||'—'}</td></tr>
       <tr><td><strong>Residente</strong></td><td colspan="3">${escapeHtml(s.residente)||'—'}</td></tr>
     </table>
-    <h3>Detalle de cuotas ${anio}</h3>
+    <h3>Cuota del año ${anio}</h3>
     <table>
-      <tr><th>Mes</th><th>Importe</th><th>Estado</th><th>Método</th><th>Fecha de pago</th></tr>
-      ${filas || '<tr><td colspan="5">Sin cuotas registradas este año.</td></tr>'}
+      <tr><th>Importe</th><th>Estado</th><th>Método</th><th>Fecha de pago</th></tr>
+      ${cuota ? `<tr><td>${euros(cuota.importe)} €</td><td>${cuota.estado}</td><td>${cuota.metodo||'—'}</td><td>${cuota.fecha_pago||'—'}</td></tr>` : '<tr><td colspan="4">Sin cuota registrada este año.</td></tr>'}
     </table>
-    <p style="margin-top:14px;"><strong>Total pagado en ${anio}: ${euros(total)} €</strong> (${pagadas.length} cuota(s) pagada(s))</p>
-    <p style="margin-top:18px;">Recibí de D./Dña. <strong>${escapeHtml(s.nombre)}</strong> la cantidad de <strong>${euros(total)} €</strong> en concepto de cuota(s) de socio del año ${anio} de la Asociación de familiares del CPRPM Naranco.</p>
+    <p style="margin-top:18px;">Recibí de D./Dña. <strong>${escapeHtml(s.nombre)}</strong> la cantidad de <strong>${euros(total)} €</strong> en concepto de cuota de socio del año ${anio} de la Asociación de familiares del CPRPM Naranco.</p>
     <table style="margin-top:20px;"><tr><td style="width:50%;">Fecha: ${new Date().toLocaleDateString('es-ES')}</td><td style="width:50%;">Fdo.: Tesorero/a de la Asociación<br><br>(Firma y sello)</td></tr></table>
   `;
   window.print();
@@ -1245,24 +1241,24 @@ async function enviarReciboWA(socioId){
   const s = socios.find(x=>x.id===socioId);
   if(!s || !s.tel1) return;
   const anio = document.getElementById('recibo_anio').value;
-  const { pagadas, total } = await datosRecibo(socioId, anio);
+  const { cuota, total } = await datosRecibo(socioId, anio);
   const num = s.tel1.replace(/\D/g,'');
-  const msg = encodeURIComponent(`Hola ${s.nombre}, te escribimos de Asociación de familiares del CPRPM Naranco. Te confirmamos el recibo de tu cuota del año ${anio}: ${pagadas.length} cuota(s) pagada(s), total ${euros(total)} €. Si necesitas el recibo en PDF, dínoslo. ¡Gracias!`);
+  const msg = encodeURIComponent(`Hola ${s.nombre}, te escribimos de Asociación de familiares del CPRPM Naranco. Te confirmamos el recibo de tu cuota del año ${anio}: ${cuota?cuota.estado:'Sin registrar'}, ${euros(total)} €. Si necesitas el recibo en PDF, dínoslo. ¡Gracias!`);
   window.open(`https://wa.me/34${num}?text=${msg}`, '_blank');
 }
 async function enviarReciboEmail(socioId){
   const s = socios.find(x=>x.id===socioId);
   if(!s || !s.email) return;
   const anio = document.getElementById('recibo_anio').value;
-  const { pagadas, total } = await datosRecibo(socioId, anio);
+  const { cuota, total } = await datosRecibo(socioId, anio);
   const asunto = encodeURIComponent(`Recibo cuota de socio ${anio} — Asociación de familiares del CPRPM Naranco`);
-  const cuerpoTexto = `Hola ${s.nombre},\n\nTe confirmamos el recibo de tu cuota de socio del año ${anio}:\n- Cuotas pagadas: ${pagadas.length}\n- Total: ${euros(total)} €\n\nUn saludo,\nAsociación de familiares del CPRPM Naranco`;
+  const cuerpoTexto = `Hola ${s.nombre},\n\nTe confirmamos el recibo de tu cuota de socio del año ${anio}:\n- Estado: ${cuota?cuota.estado:'Sin registrar'}\n- Total: ${euros(total)} €\n\nUn saludo,\nAsociación de familiares del CPRPM Naranco`;
   window.location.href = `mailto:${s.email}?subject=${asunto}&body=${encodeURIComponent(cuerpoTexto)}`;
 }
 
 // ---------- PANEL ----------
 async function renderPanel(){
-  const key = mesKey(new Date());
+  const key = String(new Date().getFullYear());
   const { data: cuotasMes } = await db.from('cuotas').select('estado').eq('mes_key', key);
   const { data: incAbiertas } = await db.from('incidencias').select('id').neq('estado','Cerrada');
   const { data: gastosData } = await db.from('gastos').select('importe');
@@ -1275,8 +1271,8 @@ async function renderPanel(){
   const saldo = totalCuotasPagadas - totalGastos;
   document.getElementById('panelCards').innerHTML = `
     <div class="metric"><div class="label">Total socios</div><div class="value">${socios.length}</div></div>
-    <div class="metric ok"><div class="label">Cuotas pagadas (mes)</div><div class="value">${pagadas}</div></div>
-    <div class="metric warn"><div class="label">Cuotas pendientes (mes)</div><div class="value">${pendientes}</div></div>
+    <div class="metric ok"><div class="label">Cuotas pagadas (año)</div><div class="value">${pagadas}</div></div>
+    <div class="metric warn"><div class="label">Cuotas pendientes (año)</div><div class="value">${pendientes}</div></div>
     <div class="metric warn"><div class="label">LPD sin firmar</div><div class="value">${lpdPendiente}</div></div>
     <div class="metric"><div class="label">Incidencias abiertas</div><div class="value">${(incAbiertas||[]).length}</div></div>
     <div class="metric"><div class="label">Saldo histórico</div><div class="value">${euros(saldo)} €</div></div>
@@ -1305,7 +1301,7 @@ function imprimirSocios(){
   window.print();
 }
 async function imprimirCuotasInforme(){
-  const key = mesKey(mesActual);
+  const key = String(anioActual);
   const { data } = await db.from('cuotas').select('*, socios(numero_socio, nombre, residente)').eq('mes_key', key);
   const rows = (data||[]).filter(c=>c.socios).sort((a,b)=>(a.socios.numero_socio||0)-(b.socios.numero_socio||0));
   const filas = rows.map(c=>`
@@ -1314,7 +1310,7 @@ async function imprimirCuotasInforme(){
   `).join('');
   const total = rows.filter(c=>c.estado==='Pagado').reduce((a,c)=>a+Number(c.importe||0),0);
   document.getElementById('printArea').innerHTML = `
-    ${cabeceraInforme('Informe de cuotas', mesLabel(mesActual))}
+    ${cabeceraInforme('Informe de cuotas', 'Año '+anioActual)}
     <table>
       <tr><th>ID</th><th>Familiar</th><th>Residente</th><th>Importe</th><th>Estado</th><th>Método</th><th>Fecha de pago</th></tr>
       ${filas || '<tr><td colspan="7">Sin resultados.</td></tr>'}
