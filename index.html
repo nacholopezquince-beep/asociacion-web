@@ -80,6 +80,7 @@
   .toast{ position:fixed; bottom:20px; right:20px; background:var(--teal-900); color:#fff; padding:11px 18px; border-radius:8px; font-size:13.5px; box-shadow:var(--shadow); z-index:100; opacity:0; transform:translateY(10px); transition:.25s; }
   .toast.show{ opacity:1; transform:translateY(0); }
   .muted{ color:var(--ink-soft); font-size:13px; }
+  .note-box{ background:var(--gold-100); border:1px solid var(--gold-600); border-radius:8px; padding:12px 14px; font-size:13.5px; color:#5c470f; margin-bottom:14px; }
   .checkbox-row{ display:flex; align-items:center; gap:8px; }
   .checkbox-row input{ width:auto; }
 
@@ -166,6 +167,7 @@
         <h2>Socios</h2>
         <div style="display:flex; gap:8px;">
           <button class="btn secondary" onclick="imprimirSocios()">Imprimir listado</button>
+          <button class="btn secondary" onclick="imprimirJuntaDirectiva()">Imprimir Junta Directiva</button>
           <button class="btn" onclick="openSocioForm()">+ Nuevo socio</button>
         </div>
       </div>
@@ -418,6 +420,20 @@
           <li>Desde ese momento no podrá volver a entrar en la web, con ninguna contraseña.</li>
         </ol>
       </div>
+
+      <div class="card" style="max-width:640px; margin-top:16px;">
+        <h3 style="margin-bottom:10px;">Usuarios con acceso a la web</h3>
+        <p class="muted" style="margin:0 0 14px;">Aquí puedes crear o eliminar accesos directamente, sin ir a Supabase.</p>
+        <div style="display:flex; gap:8px; margin-bottom:14px;">
+          <button class="btn" onclick="abrirNuevoUsuario()">+ Nuevo usuario</button>
+          <button class="btn secondary" onclick="cargarUsuarios()">Actualizar lista</button>
+        </div>
+        <div id="usuariosAviso" class="note-box" style="display:none;"></div>
+        <div class="tablewrap"><table id="tableUsuarios">
+          <thead><tr><th>Email</th><th>Creado</th><th>Último acceso</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
     </section>
   </main>
 </div>
@@ -493,6 +509,7 @@ document.querySelectorAll('nav.tabs button[data-tab]').forEach(btn=>{
     if(btn.dataset.tab==='convocatorias') cargarConvocatorias();
     if(btn.dataset.tab==='gastos') cargarGastos();
     if(btn.dataset.tab==='panel') renderPanel();
+    if(btn.dataset.tab==='ajustes') cargarUsuarios();
   });
 });
 
@@ -1285,6 +1302,37 @@ function cabeceraInforme(titulo, subtitulo){
     <p class="muted" style="margin:0 0 4px;">${titulo}</p>
     <p class="muted" style="margin:0 0 14px;">${subtitulo||''} — generado el ${new Date().toLocaleDateString('es-ES')}</p>`;
 }
+function imprimirJuntaDirectiva(){
+  const orden = ['Presidente/a','Vicepresidente/a','Secretario/a','Tesorero/a','Vocal'];
+  const junta = socios.filter(s=>s.cargo)
+    .sort((a,b)=> orden.indexOf(a.cargo) - orden.indexOf(b.cargo));
+  const filas = junta.map(s=>`
+    <tr>
+      <td>${escapeHtml(s.cargo)}</td>
+      <td>${escapeHtml(s.nombre)}</td>
+      <td>${escapeHtml(s.nif)||'—'}</td>
+      <td>${escapeHtml(s.tel1)||'—'}</td>
+      <td>${escapeHtml(s.email)||'—'}</td>
+    </tr>
+  `).join('');
+  document.getElementById('printArea').innerHTML = `
+    <h2>Asociación de familiares del CPRPM Naranco</h2>
+    <p class="muted" style="margin:0 0 14px;">Composición de la Junta Directiva</p>
+    <table>
+      <tr><th>Cargo</th><th>Nombre y apellidos</th><th>NIF</th><th>Teléfono</th><th>Email</th></tr>
+      ${filas || '<tr><td colspan="5">No hay ningún socio marcado con cargo en la Junta Directiva.</td></tr>'}
+    </table>
+    <p style="margin-top:24px;">En Oviedo, a ${new Date().toLocaleDateString('es-ES',{day:'numeric', month:'long', year:'numeric'})}.</p>
+    <table style="margin-top:24px;">
+      <tr>
+        <td style="width:50%;">Fdo.: El/La Presidente/a<br><br><br>_______________________</td>
+        <td style="width:50%;">Fdo.: El/La Secretario/a<br><br><br>_______________________</td>
+      </tr>
+    </table>
+  `;
+  window.print();
+}
+
 function imprimirSocios(){
   const filas = socios.map(s=>`
     <tr><td>${s.numero_socio||'—'}</td><td>${escapeHtml(s.nombre)}</td><td>${escapeHtml(s.cargo)||'—'}</td>
@@ -1390,6 +1438,80 @@ async function guardarNuevaPassword(){
   if(error){ errBox.textContent = 'Error: '+error.message; errBox.style.display='block'; return; }
   closeModal();
   showToast('Contraseña cambiada. Úsala la próxima vez que entres.');
+}
+
+// ---------- USUARIOS (admin) ----------
+async function llamarApiUsuarios(method, body){
+  const { data:{ session } } = await db.auth.getSession();
+  const res = await fetch('/api/admin-users', {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + session.access_token
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const json = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(json.error || ('Error '+res.status));
+  return json;
+}
+async function cargarUsuarios(){
+  const aviso = document.getElementById('usuariosAviso');
+  aviso.style.display = 'none';
+  try{
+    const { usuarios } = await llamarApiUsuarios('GET');
+    const body = document.querySelector('#tableUsuarios tbody');
+    body.innerHTML = usuarios.length ? usuarios.map(u=>`
+      <tr>
+        <td>${escapeHtml(u.email)}</td>
+        <td>${u.creado ? new Date(u.creado).toLocaleDateString('es-ES') : '—'}</td>
+        <td>${u.ultimo_acceso ? new Date(u.ultimo_acceso).toLocaleDateString('es-ES') : 'Nunca'}</td>
+        <td><button class="icon-btn" onclick="eliminarUsuario('${u.id}','${escapeAttr(u.email)}')">Eliminar acceso</button></td>
+      </tr>
+    `).join('') : `<tr><td colspan="4" class="empty">No se ha podido cargar la lista.</td></tr>`;
+  }catch(err){
+    aviso.textContent = 'No se ha podido conectar con la función de administración: '+err.message+'. Si acabas de configurarla en Vercel, puede tardar un minuto en estar lista.';
+    aviso.style.display = 'block';
+  }
+}
+function abrirNuevoUsuario(){
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Nuevo usuario</h3>
+    <div class="field"><label>Email</label><input type="email" id="nu_email"></div>
+    <div class="field"><label>Contraseña</label><input type="text" id="nu_password" placeholder="Mínimo 6 caracteres"></div>
+    <div id="nuError" class="login-error" style="display:none;"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn" onclick="crearUsuario()">Crear usuario</button>
+    </div>
+  `;
+  openModal();
+}
+async function crearUsuario(){
+  const email = document.getElementById('nu_email').value.trim();
+  const password = document.getElementById('nu_password').value;
+  const errBox = document.getElementById('nuError');
+  errBox.style.display = 'none';
+  if(!email || !password){ errBox.textContent = 'Rellena email y contraseña.'; errBox.style.display='block'; return; }
+  try{
+    await llamarApiUsuarios('POST', { email, password });
+    closeModal();
+    showToast('Usuario creado.');
+    await cargarUsuarios();
+  }catch(err){
+    errBox.textContent = 'Error: '+err.message;
+    errBox.style.display = 'block';
+  }
+}
+async function eliminarUsuario(id, email){
+  if(!confirm(`¿Eliminar el acceso de ${email}? No podrá volver a entrar.`)) return;
+  try{
+    await llamarApiUsuarios('DELETE', { id });
+    showToast('Acceso eliminado.');
+    await cargarUsuarios();
+  }catch(err){
+    showToast('Error al eliminar: '+err.message);
+  }
 }
 
 // ---------- MODAL ----------
