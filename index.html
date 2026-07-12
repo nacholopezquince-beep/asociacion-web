@@ -139,6 +139,7 @@
     </div>
     <div class="userbox">
       <span id="userEmail"></span>
+      <button class="btn secondary" onclick="abrirCambiarPassword()">Cambiar contraseña</button>
       <button class="btn secondary" onclick="cerrarSesion()">Cerrar sesión</button>
     </div>
   </header>
@@ -1361,6 +1362,34 @@ function imprimirGastosInforme(){
     <p style="margin-top:10px;"><strong>Total: ${euros(total)} €</strong></p>
   `;
   window.print();
+}
+
+// ---------- CAMBIAR CONTRASEÑA ----------
+function abrirCambiarPassword(){
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Cambiar mi contraseña</h3>
+    <p class="muted" style="margin:0 0 14px;">Elige una contraseña nueva que puedas recordar. Solo cambia la tuya, no afecta a nadie más.</p>
+    <div class="field"><label>Nueva contraseña</label><input type="password" id="pw_nueva" autocomplete="new-password"></div>
+    <div class="field"><label>Repite la nueva contraseña</label><input type="password" id="pw_repetir" autocomplete="new-password"></div>
+    <div id="pwError" class="login-error" style="display:none;"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn" onclick="guardarNuevaPassword()">Guardar contraseña</button>
+    </div>
+  `;
+  openModal();
+}
+async function guardarNuevaPassword(){
+  const nueva = document.getElementById('pw_nueva').value;
+  const repetir = document.getElementById('pw_repetir').value;
+  const errBox = document.getElementById('pwError');
+  errBox.style.display = 'none';
+  if(nueva.length < 6){ errBox.textContent = 'La contraseña debe tener al menos 6 caracteres.'; errBox.style.display='block'; return; }
+  if(nueva !== repetir){ errBox.textContent = 'Las dos contraseñas no coinciden.'; errBox.style.display='block'; return; }
+  const { error } = await db.auth.updateUser({ password: nueva });
+  if(error){ errBox.textContent = 'Error: '+error.message; errBox.style.display='block'; return; }
+  closeModal();
+  showToast('Contraseña cambiada. Úsala la próxima vez que entres.');
 }
 
 // ---------- MODAL ----------
