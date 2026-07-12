@@ -606,9 +606,8 @@ function cambiarAnio(delta){
 }
 async function ensureCuotaAnio(){
   const key = String(anioActual);
-  const pagan = socios.filter(s=>s.paga_cuota);
-  if(!pagan.length) return;
-  const filas = pagan.map(s=>({ socio_id:s.id, mes_key:key, importe:cuotaDefecto, estado:'Pendiente' }));
+  if(!socios.length) return;
+  const filas = socios.map(s=>({ socio_id:s.id, mes_key:key, importe:cuotaDefecto, estado:'Pendiente' }));
   await db.from('cuotas').upsert(filas, { onConflict:'socio_id,mes_key', ignoreDuplicates:true });
 }
 async function cargarCuotas(){
