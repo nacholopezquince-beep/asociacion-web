@@ -701,7 +701,23 @@ function renderCuotas(rows){
 async function updateCuota(id, patch){
   const { error } = await db.from('cuotas').update(patch).eq('id', id);
   if(error){ showToast('Error al guardar: '+error.message); return; }
+  if(patch.estado){ await syncIngresoDesdeCuota(id); }
   await cargarCuotas();
+}
+async function syncIngresoDesdeCuota(cuotaId){
+  const { data: c } = await db.from('cuotas').select('*, socios(nombre)').eq('id', cuotaId).single();
+  if(!c) return;
+  if(c.estado === 'Pagado'){
+    await db.from('ingresos').upsert({
+      cuota_id: c.id,
+      fecha: c.fecha_pago || new Date().toISOString().slice(0,10),
+      concepto: `Cuota anual ${c.mes_key} - ${c.socios.nombre}`,
+      origen: 'Cuota de socio',
+      importe: c.importe
+    }, { onConflict:'cuota_id' });
+  } else {
+    await db.from('ingresos').delete().eq('cuota_id', c.id);
+  }
 }
 function reclamarWA(tel, nombre, importe){
   const num = tel.replace(/\D/g,'');
@@ -1165,16 +1181,20 @@ function renderIngresos(){
   body.innerHTML = ingresos.length ? ingresos.map(g=>`
     <tr>
       <td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.origen)||'—'}</td>
-      <td>${euros(g.importe)} €</td><td>${escapeHtml(g.documento)||'—'}</td>
+      <td>${euros(g.importe)} €</td>
+      <td>${g.documento_url ? `<a href="${g.documento_url}" target="_blank">Ver documento</a>` : '—'}</td>
       <td>
+        ${g.cuota_id ? '<span class="muted">De cuota</span>' : `
         <button class="icon-btn" onclick="openIngresoForm('${g.id}')">Editar</button>
-        <button class="icon-btn" onclick="deleteIngreso('${g.id}')">Eliminar</button>
+        <button class="icon-btn" onclick="deleteIngreso('${g.id}')">Eliminar</button>`}
       </td>
     </tr>
   `).join('') : `<tr><td colspan="6" class="empty">No hay ingresos registrados.</td></tr>`;
 }
 function openIngresoForm(id){
   const g = id ? ingresos.find(x=>x.id===id) : null;
+  const origenesFijos = ['Donativo','Subvención','Donación','Otros'];
+  const esOtro = g?.origen && !origenesFijos.includes(g.origen);
   document.getElementById('modalContent').innerHTML = `
     <h3>${g?'Editar ingreso':'Nuevo ingreso'}</h3>
     <div class="grid2">
@@ -1182,10 +1202,20 @@ function openIngresoForm(id){
       <div class="field"><label>Importe (€)</label><input type="text" id="f_importe" value="${g?.importe||''}"></div>
     </div>
     <div class="field"><label>Concepto</label><input type="text" id="f_concepto" value="${escapeAttr(g?.concepto)}"></div>
-    <div class="grid2">
-      <div class="field"><label>Origen</label><input type="text" id="f_origen" placeholder="Donativo, subvención, evento..." value="${escapeAttr(g?.origen)}"></div>
-      <div class="field"><label>Documento justificativo</label><input type="text" id="f_documento" value="${escapeAttr(g?.documento)}"></div>
+    <div class="field"><label>Origen</label><select id="f_origen" onchange="document.getElementById('f_origenOtroWrap').style.display=this.value==='Otros'?'block':'none';">
+      <option value="">Selecciona...</option>
+      <option value="Donativo" ${g?.origen==='Donativo'?'selected':''}>Donativo</option>
+      <option value="Subvención" ${g?.origen==='Subvención'?'selected':''}>Subvención</option>
+      <option value="Donación" ${g?.origen==='Donación'?'selected':''}>Donación</option>
+      <option value="Otros" ${esOtro?'selected':''}>Otros</option>
+    </select></div>
+    <div class="field" id="f_origenOtroWrap" style="display:${esOtro?'block':'none'};">
+      <label>Especifica el origen</label><input type="text" id="f_origenOtro" value="${esOtro?escapeAttr(g?.origen):''}">
     </div>
+    <div class="field"><label>Justificante (foto o PDF, opcional)</label><input type="file" id="f_documentoFile" accept="image/*,.pdf">
+      ${g?.documento_url ? `<p class="muted" style="margin-top:6px;">Ya hay uno subido: <a href="${g.documento_url}" target="_blank">verlo</a>. Sube otro para sustituirlo.</p>` : ''}
+    </div>
+    <div id="ingresoError" class="login-error" style="display:none;"></div>
     <div class="modal-actions">
       <button class="btn secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn" onclick="saveIngreso('${g?g.id:''}')">Guardar</button>
@@ -1194,18 +1224,32 @@ function openIngresoForm(id){
   openModal();
 }
 async function saveIngreso(id){
+  const errBox = document.getElementById('ingresoError');
+  errBox.style.display = 'none';
+  const origenSel = document.getElementById('f_origen').value;
+  const origen = origenSel==='Otros' ? document.getElementById('f_origenOtro').value.trim() : origenSel;
   const data = {
     fecha: document.getElementById('f_fecha').value,
     importe: parseFloat(document.getElementById('f_importe').value)||0,
     concepto: document.getElementById('f_concepto').value.trim(),
-    origen: document.getElementById('f_origen').value.trim(),
-    documento: document.getElementById('f_documento').value.trim()
+    origen: origen
   };
   if(!data.concepto || !data.fecha){ showToast('Indica al menos la fecha y el concepto.'); return; }
+
+  const fileInput = document.getElementById('f_documentoFile');
+  if(fileInput.files && fileInput.files[0]){
+    const file = fileInput.files[0];
+    const nombreArchivo = `${Date.now()}-${file.name}`;
+    const { error: upErr } = await db.storage.from('documentos').upload(nombreArchivo, file);
+    if(upErr){ errBox.textContent = 'Error subiendo el archivo: '+upErr.message; errBox.style.display='block'; return; }
+    const { data: pub } = db.storage.from('documentos').getPublicUrl(nombreArchivo);
+    data.documento_url = pub.publicUrl;
+  }
+
   let error;
   if(id){ ({ error } = await db.from('ingresos').update(data).eq('id', id)); }
   else { ({ error } = await db.from('ingresos').insert(data)); }
-  if(error){ showToast('Error al guardar: '+error.message); return; }
+  if(error){ errBox.textContent = 'Error al guardar: '+error.message; errBox.style.display='block'; return; }
   closeModal();
   await cargarIngresos();
   showToast('Ingreso guardado.');
@@ -1220,13 +1264,13 @@ async function deleteIngreso(id){
 function imprimirIngresosInforme(){
   const filas = ingresos.map(g=>`
     <tr><td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.origen)||'—'}</td>
-    <td>${euros(g.importe)} €</td><td>${escapeHtml(g.documento)||'—'}</td></tr>
+    <td>${euros(g.importe)} €</td><td>${g.documento_url?'Sí':'No'}</td></tr>
   `).join('');
   const total = ingresos.reduce((a,g)=>a+Number(g.importe||0),0);
   document.getElementById('printArea').innerHTML = `
     ${cabeceraInforme('Informe de ingresos', `${ingresos.length} ingresos registrados`)}
     <table>
-      <tr><th>Fecha</th><th>Concepto</th><th>Origen</th><th>Importe</th><th>Documento</th></tr>
+      <tr><th>Fecha</th><th>Concepto</th><th>Origen</th><th>Importe</th><th>Justificante</th></tr>
       ${filas || '<tr><td colspan="5">Sin resultados.</td></tr>'}
     </table>
     <p style="margin-top:10px;"><strong>Total: ${euros(total)} €</strong></p>
@@ -1392,14 +1436,12 @@ async function renderPanel(){
   const { data: incAbiertas } = await db.from('incidencias').select('id').neq('estado','Cerrada');
   const { data: gastosData } = await db.from('gastos').select('importe');
   const { data: ingresosData } = await db.from('ingresos').select('importe');
-  const { data: cuotasPagadasHist } = await db.from('cuotas').select('importe').eq('estado','Pagado');
   const pagadas = (cuotasMes||[]).filter(c=>c.estado==='Pagado').length;
   const pendientes = (cuotasMes||[]).filter(c=>c.estado==='Pendiente').length;
   const lpdPendiente = socios.filter(s=>!s.lpd).length;
   const totalGastos = (gastosData||[]).reduce((a,g)=>a+Number(g.importe||0),0);
   const totalIngresos = (ingresosData||[]).reduce((a,g)=>a+Number(g.importe||0),0);
-  const totalCuotasPagadas = (cuotasPagadasHist||[]).reduce((a,c)=>a+Number(c.importe||0),0);
-  const saldo = totalCuotasPagadas + totalIngresos - totalGastos;
+  const saldo = totalIngresos - totalGastos;
   document.getElementById('panelCards').innerHTML = `
     <div class="metric"><div class="label">Total socios</div><div class="value">${socios.length}</div></div>
     <div class="metric ok"><div class="label">Cuotas pagadas (año)</div><div class="value">${pagadas}</div></div>
