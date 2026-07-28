@@ -8,7 +8,6 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 module.exports = async (req, res) => {
-  // Comprueba que quien llama es el propio Vercel Cron, no cualquiera de internet.
   const authHeader = req.headers.authorization || '';
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     res.status(401).json({ error: 'No autorizado.' });
@@ -23,11 +22,12 @@ module.exports = async (req, res) => {
   try {
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-    const [socios, cuotas, incidencias, gastos, actas, convocatorias, ajustes] = await Promise.all([
+    const [socios, cuotas, incidencias, gastos, ingresos, actas, convocatorias, ajustes] = await Promise.all([
       admin.from('socios').select('*'),
       admin.from('cuotas').select('*'),
       admin.from('incidencias').select('*'),
       admin.from('gastos').select('*'),
+      admin.from('ingresos').select('*'),
       admin.from('actas').select('*'),
       admin.from('convocatorias').select('*'),
       admin.from('ajustes').select('*')
@@ -39,6 +39,7 @@ module.exports = async (req, res) => {
       cuotas: cuotas.data || [],
       incidencias: incidencias.data || [],
       gastos: gastos.data || [],
+      ingresos: ingresos.data || [],
       actas: actas.data || [],
       convocatorias: convocatorias.data || [],
       ajustes: ajustes.data || []
