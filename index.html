@@ -100,14 +100,14 @@
   .asist-btn.justificada{ background:var(--gold-100); color:#8a6a1f; }
   #printArea{ display:none; }
   @media print{
-    body > *:not(#printArea){ display:none !important; }
-    #printArea{ display:block !important; position:static !important; width:auto !important; padding:0; }
-    #printArea table{ width:100%; border-collapse:collapse; margin-top:6px; }
+    body *{ visibility:hidden; }
+    #printArea, #printArea *{ visibility:visible; }
+    #printArea{ display:block; position:absolute; top:0; left:0; width:100%; padding:24px; }
     #printArea h2{ font-size:20px; margin-bottom:2px; }
     #printArea h3{ font-size:15px; margin:16px 0 6px; }
-    
-    #printArea tr{ page-break-inside:avoid; break-inside:avoid; }
-    #printArea p{ font-size:13px; white-space:normal; }
+    #printArea table{ width:100%; border-collapse:collapse; margin-top:6px; }
+    #printArea td, #printArea th{ border:1px solid #999; padding:4px 8px; font-size:12px; }
+    #printArea p{ font-size:13px; white-space:pre-wrap; }
   }
 </style>
 </head>
@@ -152,6 +152,7 @@
     <button data-tab="incidencias">Incidencias</button>
     <button data-tab="actas">Actas</button>
     <button data-tab="convocatorias">Convocatorias</button>
+    <button data-tab="ingresos">Ingresos</button>
     <button data-tab="gastos">Gastos</button>
     <button data-tab="ajustes">Ajustes</button>
   </nav>
@@ -385,6 +386,21 @@
       </div>
     </section>
 
+    <section class="panel" id="tab-ingresos">
+      <div class="section-title">
+        <h2>Ingresos de la asociación</h2>
+        <div style="display:flex; gap:8px;">
+          <button class="btn secondary" onclick="imprimirIngresosInforme()">Imprimir informe</button>
+          <button class="btn" onclick="openIngresoForm()">+ Nuevo ingreso</button>
+        </div>
+      </div>
+      <div class="cards" id="ingresosResumen" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px;"></div>
+      <div class="card"><div class="tablewrap"><table id="tableIngresos">
+        <thead><tr><th>Fecha</th><th>Concepto</th><th>Origen</th><th>Importe (€)</th><th>Documento</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div></div>
+    </section>
+
     <section class="panel" id="tab-gastos">
       <div class="section-title">
         <h2>Gastos de la asociación</h2>
@@ -433,6 +449,12 @@
           <thead><tr><th>Email</th><th>Creado</th><th>Último acceso</th><th></th></tr></thead>
           <tbody></tbody>
         </table></div>
+      </div>
+
+      <div class="card" style="max-width:640px; margin-top:16px;">
+        <h3 style="margin-bottom:10px;">Copia de seguridad</h3>
+        <p class="muted" style="margin:0 0 14px;">Descarga de golpe todos los datos (socios, cuotas, incidencias, gastos, actas y convocatorias) en un único archivo. Guárdalo en Google Drive o donde prefieras, de vez en cuando.</p>
+        <button class="btn" onclick="exportarTodoJSON()">Exportar todo (JSON)</button>
       </div>
     </section>
   </main>
@@ -507,6 +529,7 @@ document.querySelectorAll('nav.tabs button[data-tab]').forEach(btn=>{
     if(btn.dataset.tab==='incidencias') cargarIncidencias();
     if(btn.dataset.tab==='actas') cargarActas();
     if(btn.dataset.tab==='convocatorias') cargarConvocatorias();
+    if(btn.dataset.tab==='ingresos') cargarIngresos();
     if(btn.dataset.tab==='gastos') cargarGastos();
     if(btn.dataset.tab==='panel') renderPanel();
     if(btn.dataset.tab==='ajustes') cargarUsuarios();
@@ -1122,6 +1145,95 @@ function enviarConvocatoriaWA(convId, socioId){
   window.open(`https://wa.me/34${num}?text=${msg}`, '_blank');
 }
 
+// ---------- INGRESOS ----------
+let ingresos = [];
+async function cargarIngresos(){
+  const { data, error } = await db.from('ingresos').select('*').order('fecha', {ascending:false});
+  if(error){ showToast('Error cargando ingresos: '+error.message); return; }
+  ingresos = data;
+  renderIngresos();
+}
+function renderIngresos(){
+  const total = ingresos.reduce((a,g)=>a+Number(g.importe||0),0);
+  const esteAnio = String(new Date().getFullYear());
+  const totalAnio = ingresos.filter(g=>g.fecha && g.fecha.startsWith(esteAnio)).reduce((a,g)=>a+Number(g.importe||0),0);
+  document.getElementById('ingresosResumen').innerHTML = `
+    <div class="metric ok"><div class="label">Total histórico</div><div class="value">${euros(total)} €</div></div>
+    <div class="metric"><div class="label">Este año</div><div class="value">${euros(totalAnio)} €</div></div>
+  `;
+  const body = document.querySelector('#tableIngresos tbody');
+  body.innerHTML = ingresos.length ? ingresos.map(g=>`
+    <tr>
+      <td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.origen)||'—'}</td>
+      <td>${euros(g.importe)} €</td><td>${escapeHtml(g.documento)||'—'}</td>
+      <td>
+        <button class="icon-btn" onclick="openIngresoForm('${g.id}')">Editar</button>
+        <button class="icon-btn" onclick="deleteIngreso('${g.id}')">Eliminar</button>
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="6" class="empty">No hay ingresos registrados.</td></tr>`;
+}
+function openIngresoForm(id){
+  const g = id ? ingresos.find(x=>x.id===id) : null;
+  document.getElementById('modalContent').innerHTML = `
+    <h3>${g?'Editar ingreso':'Nuevo ingreso'}</h3>
+    <div class="grid2">
+      <div class="field"><label>Fecha</label><input type="date" id="f_fecha" value="${g?.fecha||new Date().toISOString().slice(0,10)}"></div>
+      <div class="field"><label>Importe (€)</label><input type="text" id="f_importe" value="${g?.importe||''}"></div>
+    </div>
+    <div class="field"><label>Concepto</label><input type="text" id="f_concepto" value="${escapeAttr(g?.concepto)}"></div>
+    <div class="grid2">
+      <div class="field"><label>Origen</label><input type="text" id="f_origen" placeholder="Donativo, subvención, evento..." value="${escapeAttr(g?.origen)}"></div>
+      <div class="field"><label>Documento justificativo</label><input type="text" id="f_documento" value="${escapeAttr(g?.documento)}"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn" onclick="saveIngreso('${g?g.id:''}')">Guardar</button>
+    </div>
+  `;
+  openModal();
+}
+async function saveIngreso(id){
+  const data = {
+    fecha: document.getElementById('f_fecha').value,
+    importe: parseFloat(document.getElementById('f_importe').value)||0,
+    concepto: document.getElementById('f_concepto').value.trim(),
+    origen: document.getElementById('f_origen').value.trim(),
+    documento: document.getElementById('f_documento').value.trim()
+  };
+  if(!data.concepto || !data.fecha){ showToast('Indica al menos la fecha y el concepto.'); return; }
+  let error;
+  if(id){ ({ error } = await db.from('ingresos').update(data).eq('id', id)); }
+  else { ({ error } = await db.from('ingresos').insert(data)); }
+  if(error){ showToast('Error al guardar: '+error.message); return; }
+  closeModal();
+  await cargarIngresos();
+  showToast('Ingreso guardado.');
+}
+async function deleteIngreso(id){
+  if(!confirm('¿Eliminar este ingreso?')) return;
+  const { error } = await db.from('ingresos').delete().eq('id', id);
+  if(error){ showToast('Error al eliminar: '+error.message); return; }
+  await cargarIngresos();
+  showToast('Ingreso eliminado.');
+}
+function imprimirIngresosInforme(){
+  const filas = ingresos.map(g=>`
+    <tr><td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.origen)||'—'}</td>
+    <td>${euros(g.importe)} €</td><td>${escapeHtml(g.documento)||'—'}</td></tr>
+  `).join('');
+  const total = ingresos.reduce((a,g)=>a+Number(g.importe||0),0);
+  document.getElementById('printArea').innerHTML = `
+    ${cabeceraInforme('Informe de ingresos', `${ingresos.length} ingresos registrados`)}
+    <table>
+      <tr><th>Fecha</th><th>Concepto</th><th>Origen</th><th>Importe</th><th>Documento</th></tr>
+      ${filas || '<tr><td colspan="5">Sin resultados.</td></tr>'}
+    </table>
+    <p style="margin-top:10px;"><strong>Total: ${euros(total)} €</strong></p>
+  `;
+  window.print();
+}
+
 // ---------- GASTOS ----------
 let gastos = [];
 async function cargarGastos(){
@@ -1279,13 +1391,15 @@ async function renderPanel(){
   const { data: cuotasMes } = await db.from('cuotas').select('estado').eq('mes_key', key);
   const { data: incAbiertas } = await db.from('incidencias').select('id').neq('estado','Cerrada');
   const { data: gastosData } = await db.from('gastos').select('importe');
+  const { data: ingresosData } = await db.from('ingresos').select('importe');
   const { data: cuotasPagadasHist } = await db.from('cuotas').select('importe').eq('estado','Pagado');
   const pagadas = (cuotasMes||[]).filter(c=>c.estado==='Pagado').length;
   const pendientes = (cuotasMes||[]).filter(c=>c.estado==='Pendiente').length;
   const lpdPendiente = socios.filter(s=>!s.lpd).length;
   const totalGastos = (gastosData||[]).reduce((a,g)=>a+Number(g.importe||0),0);
+  const totalIngresos = (ingresosData||[]).reduce((a,g)=>a+Number(g.importe||0),0);
   const totalCuotasPagadas = (cuotasPagadasHist||[]).reduce((a,c)=>a+Number(c.importe||0),0);
-  const saldo = totalCuotasPagadas - totalGastos;
+  const saldo = totalCuotasPagadas + totalIngresos - totalGastos;
   document.getElementById('panelCards').innerHTML = `
     <div class="metric"><div class="label">Total socios</div><div class="value">${socios.length}</div></div>
     <div class="metric ok"><div class="label">Cuotas pagadas (año)</div><div class="value">${pagadas}</div></div>
@@ -1512,6 +1626,38 @@ async function eliminarUsuario(id, email){
   }catch(err){
     showToast('Error al eliminar: '+err.message);
   }
+}
+
+// ---------- COPIA DE SEGURIDAD ----------
+async function exportarTodoJSON(){
+  showToast('Preparando la copia de seguridad...');
+  const [s, c, i, g, ing, a, cv, aj] = await Promise.all([
+    db.from('socios').select('*'),
+    db.from('cuotas').select('*'),
+    db.from('incidencias').select('*'),
+    db.from('gastos').select('*'),
+    db.from('ingresos').select('*'),
+    db.from('actas').select('*'),
+    db.from('convocatorias').select('*'),
+    db.from('ajustes').select('*')
+  ]);
+  const data = {
+    exportado_el: new Date().toISOString(),
+    socios: s.data || [],
+    cuotas: c.data || [],
+    incidencias: i.data || [],
+    gastos: g.data || [],
+    ingresos: ing.data || [],
+    actas: a.data || [],
+    convocatorias: cv.data || [],
+    ajustes: aj.data || []
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a2 = document.createElement('a');
+  a2.href = URL.createObjectURL(blob);
+  a2.download = `asociacion_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a2.click();
+  showToast('Copia de seguridad descargada.');
 }
 
 // ---------- MODAL ----------
