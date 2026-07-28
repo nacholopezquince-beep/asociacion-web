@@ -613,10 +613,15 @@ async function saveSocio(id){
     lpd: document.getElementById('f_lpd').checked
   };
   if(!data.nombre){ showToast('Indica el nombre del familiar.'); return; }
-  let error;
+  let error, socioId = id;
   if(id){ ({ error } = await db.from('socios').update(data).eq('id', id)); }
-  else { ({ error } = await db.from('socios').insert(data)); }
+  else {
+    const { data: inserted, error: insErr } = await db.from('socios').insert(data).select().single();
+    error = insErr;
+    socioId = inserted?.id;
+  }
   if(error){ showToast('Error al guardar: '+error.message); return; }
+  if(socioId){ await syncCuotaDesdeSocio(socioId, data.paga_cuota); }
   closeModal();
   await cargarSocios();
   showToast('Socio guardado.');
@@ -718,6 +723,24 @@ async function syncIngresoDesdeCuota(cuotaId){
   } else {
     await db.from('ingresos').delete().eq('cuota_id', c.id);
   }
+}
+async function syncCuotaDesdeSocio(socioId, pagaCuota){
+  const anio = String(new Date().getFullYear());
+  const { data: existente } = await db.from('cuotas').select('*').eq('socio_id', socioId).eq('mes_key', anio).maybeSingle();
+  let cuotaId = existente?.id;
+  const nuevoEstado = pagaCuota ? 'Pagado' : 'Pendiente';
+  if(cuotaId){
+    if(existente.estado !== nuevoEstado){
+      await db.from('cuotas').update({ estado: nuevoEstado, fecha_pago: pagaCuota ? (existente.fecha_pago || new Date().toISOString().slice(0,10)) : existente.fecha_pago }).eq('id', cuotaId);
+    }
+  } else {
+    const { data: inserted } = await db.from('cuotas').insert({
+      socio_id: socioId, mes_key: anio, importe: cuotaDefecto, estado: nuevoEstado,
+      fecha_pago: pagaCuota ? new Date().toISOString().slice(0,10) : null
+    }).select().single();
+    cuotaId = inserted?.id;
+  }
+  if(cuotaId) await syncIngresoDesdeCuota(cuotaId);
 }
 function reclamarWA(tel, nombre, importe){
   const num = tel.replace(/\D/g,'');
