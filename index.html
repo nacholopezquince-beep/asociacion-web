@@ -982,7 +982,7 @@ function imprimirActa(id){
     <h3>Asistentes</h3>
     <table>
       <tr><td><strong>Preside</strong></td><td>${escapeHtml(a.preside)||'—'}</td></tr>
-      <tr><td><strong>Secretario/a</strong></td><td>${escapeHtml(a.secretario)||'—'}</td></tr>
+      <tr><td><strong>Secretario</strong></td><td>${escapeHtml(a.secretario)||'—'}</td></tr>
       <tr><td><strong>Presentes (${presentes.length}/${socios.length})</strong></td><td>${nombreLista(presentes)}</td></tr>
       <tr><td><strong>Ausencias justificadas</strong></td><td>${nombreLista(justificados)}</td></tr>
     </table>
@@ -1001,8 +1001,8 @@ function imprimirActa(id){
     <p>Se levanta la sesión a las ${a.hora_fin||'—'}. Próxima reunión: ${escapeHtml(a.proxima_reunion)||'por determinar'}.</p>
     <table style="margin-top:10px;">
       <tr>
-        <td style="width:50%;">Fdo.: ${escapeHtml(a.firma_secretario)||'_______________'}<br><strong>Secretario/a</strong></td>
-        <td style="width:50%;">Vº Bº: ${escapeHtml(a.firma_presidente)||'_______________'}<br><strong>Presidente/a</strong></td>
+        <td style="width:50%;">Fdo.: ${escapeHtml(a.firma_secretario)||'_______________'}<br><strong>Secretario</strong></td>
+        <td style="width:50%;">Vº Bº: ${escapeHtml(a.firma_presidente)||'_______________'}<br><strong>Presidente</strong></td>
       </tr>
     </table>
   `;
@@ -1103,19 +1103,23 @@ function imprimirConvocatoria(id){
   const c = convocatorias.find(x=>x.id===id);
   if(!c) return;
   const destinatarioTexto = c.destinatarios==='junta' ? 'a los miembros de la Junta Directiva' : 'a todos los socios';
+  const tipoReunionTexto = c.destinatarios==='junta'
+    ? `reunión ${c.tipo.toLowerCase()} de la Junta Directiva`
+    : `Asamblea General ${c.tipo} de la Asociación`;
+  const nombreSecretario = escapeHtml(c.secretario) || '_______________________';
   document.getElementById('printArea').innerHTML = `
     <h2>Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco</h2>
     <h3>CONVOCATORIA DE ASAMBLEA ${c.tipo.toUpperCase()}</h3>
-    <p>Por acuerdo de la Junta Directiva, se convoca ${destinatarioTexto} a la Asamblea General ${c.tipo} de la Asociación,
-    que tendrá lugar el próximo ${fechaLarga(c.fecha)}, en ${escapeHtml(c.lugar)||'[lugar por determinar]'}${c.direccion?', sito en '+escapeHtml(c.direccion):''},
+    <p>Don ${nombreSecretario}, como Secretario de la Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco, convoca, por orden del Presidente, ${tipoReunionTexto}, con la presencia de ${destinatarioTexto}.</p>
+    <p>La reunión tendrá lugar el próximo ${fechaLarga(c.fecha)}, en ${escapeHtml(c.lugar)||'[lugar por determinar]'}${c.direccion?', sito en '+escapeHtml(c.direccion):''},
     a las ${c.hora_primera||'[hora]'} horas en primera convocatoria, y a las ${c.hora_segunda||'[hora]'} horas en segunda convocatoria, con el siguiente:</p>
     <h3>ORDEN DEL DÍA</h3>
     <p>${listItems(c.orden_dia).map((t,i)=>(i+1)+'. '+escapeHtml(t)).join('<br>') || 'No se especificó.'}</p>
     <p style="margin-top:18px;">En ${escapeHtml(c.ciudad)||'[ciudad]'}, a ${fechaLarga(c.fecha_emision)}.</p>
     <table style="margin-top:20px;">
       <tr>
-        <td style="width:50%;">El/La Presidente/a de la Asociación<br><br>(Firma)<br><br>Fdo.: ${escapeHtml(c.presidente)||'_______________________'}</td>
-        <td style="width:50%;">El/La Secretario/a de la Asociación<br><br>(Firma)<br><br>Fdo.: ${escapeHtml(c.secretario)||'_______________________'}</td>
+        <td style="width:50%;">El Presidente de la Asociación<br><br>(Firma)<br><br>Fdo.: ${escapeHtml(c.presidente)||'_______________________'}</td>
+        <td style="width:50%;">El Secretario de la Asociación<br><br>(Firma)<br><br>Fdo.: ${nombreSecretario}</td>
       </tr>
     </table>
   `;
@@ -1447,8 +1451,8 @@ function imprimirJuntaDirectiva(){
     <p style="margin-top:24px;">En Oviedo, a ${new Date().toLocaleDateString('es-ES',{day:'numeric', month:'long', year:'numeric'})}.</p>
     <table style="margin-top:24px;">
       <tr>
-        <td style="width:50%;">Fdo.: El/La Presidente/a<br><br><br>_______________________</td>
-        <td style="width:50%;">Fdo.: El/La Secretario/a<br><br><br>_______________________</td>
+        <td style="width:50%;">Fdo.: El Presidente<br><br><br>_______________________</td>
+        <td style="width:50%;">Fdo.: El Secretario<br><br><br>_______________________</td>
       </tr>
     </table>
   `;
