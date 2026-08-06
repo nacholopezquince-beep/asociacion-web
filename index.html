@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -109,7 +108,7 @@
     #printArea table{ width:100%; border-collapse:collapse; margin-top:6px; }
     #printArea td, #printArea th{ border:1px solid #999; padding:4px 8px; font-size:12px; box-sizing:border-box; }
     #printArea tr{ page-break-inside:avoid; break-inside:avoid; }
-    #printArea p{ font-size:13px; white-space:pre-wrap; }
+    #printArea p{ font-size:13px; white-space:normal; }
   }
 </style>
 </head>
@@ -877,7 +876,9 @@ function cerrarActaEditor(){
 }
 function renderAsistenciaTable(){
   const q = (document.getElementById('a_buscarSocio').value||'').toLowerCase();
-  const lista = [...socios].filter(s=>!q || (s.nombre+s.residente).toLowerCase().includes(q));
+  const esJunta = document.getElementById('a_organo').value === 'Junta directiva';
+  const listaBase = esJunta ? socios.filter(s=>s.cargo) : socios;
+  const lista = [...listaBase].filter(s=>!q || (s.nombre+s.residente).toLowerCase().includes(q));
   const body = document.querySelector('#tableActaAsistencia tbody');
   body.innerHTML = lista.map(s=>{
     const estado = actaDraft.asistencia[s.id] || 'ausente';
@@ -887,16 +888,18 @@ function renderAsistenciaTable(){
       <td><button class="asist-btn ${estado}" onclick="toggleAsistencia('${s.id}')">${label}</button></td>
     </tr>`;
   }).join('');
-  const presentes = Object.values(actaDraft.asistencia).filter(v=>v==='presente').length;
-  const justificados = Object.values(actaDraft.asistencia).filter(v=>v==='justificada').length;
+  const idsBase = new Set(listaBase.map(s=>s.id));
+  const presentes = Object.entries(actaDraft.asistencia).filter(([id,v])=>v==='presente' && idsBase.has(id)).length;
+  const justificados = Object.entries(actaDraft.asistencia).filter(([id,v])=>v==='justificada' && idsBase.has(id)).length;
   document.getElementById('actaAsistenciaResumen').innerHTML = `
     <div class="metric ok"><div class="label">Presentes</div><div class="value">${presentes}</div></div>
     <div class="metric"><div class="label">Ausentes justif.</div><div class="value">${justificados}</div></div>
-    <div class="metric warn"><div class="label">Ausentes</div><div class="value">${socios.length-presentes-justificados}</div></div>
-    <div class="metric"><div class="label">Total socios</div><div class="value">${socios.length}</div></div>
+    <div class="metric warn"><div class="label">Ausentes</div><div class="value">${listaBase.length-presentes-justificados}</div></div>
+    <div class="metric"><div class="label">Total ${esJunta?'Junta':'socios'}</div><div class="value">${listaBase.length}</div></div>
   `;
 }
 document.getElementById('a_buscarSocio').addEventListener('input', renderAsistenciaTable);
+document.getElementById('a_organo').addEventListener('change', renderAsistenciaTable);
 function toggleAsistencia(socioId){
   const actual = actaDraft.asistencia[socioId] || 'ausente';
   const siguiente = actual==='ausente' ? 'presente' : actual==='presente' ? 'justificada' : 'ausente';
@@ -1111,8 +1114,8 @@ function imprimirConvocatoria(id){
     <p style="margin-top:18px;">En ${escapeHtml(c.ciudad)||'[ciudad]'}, a ${fechaLarga(c.fecha_emision)}.</p>
     <table style="margin-top:20px;">
       <tr>
-        <td style="width:50%;">El Presidente de la Asociación<br><br>(Firma)<br><br>Fdo.: ${escapeHtml(c.presidente)||'_______________________'}</td>
-        <td style="width:50%;">La Secretaria de la Asociación<br><br>(Firma)<br><br>Fdo.: ${escapeHtml(c.secretario)||'_______________________'}</td>
+        <td style="width:50%;">El/La Presidente/a de la Asociación<br><br>(Firma)<br><br>Fdo.: ${escapeHtml(c.presidente)||'_______________________'}</td>
+        <td style="width:50%;">El/La Secretario/a de la Asociación<br><br>(Firma)<br><br>Fdo.: ${escapeHtml(c.secretario)||'_______________________'}</td>
       </tr>
     </table>
   `;
