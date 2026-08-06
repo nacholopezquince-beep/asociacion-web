@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Asociación de familiares del CPRPM Naranco</title>
+<title>Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -22,7 +22,7 @@
   .app{ max-width:1180px; margin:0 auto; }
   header.top{ background:var(--teal-700); color:#fff; padding:22px 28px; border-bottom:5px solid var(--gold-500);
     display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-  header.top h1{ color:#fff; font-size:20px; }
+  header.top h1{ color:#fff; font-size:18px; line-height:1.25; }
   header.top .sub{ font-size:13px; color:#CFE0DD; margin-top:2px; }
   header.top .brand{ display:flex; align-items:center; gap:12px; }
   header.top .leaf{ width:38px; height:38px; border-radius:50%; background:var(--gold-500); display:flex; align-items:center; justify-content:center; color:var(--teal-900); font-family:'Fraunces',serif; font-weight:600; font-size:18px; flex-shrink:0; }
@@ -88,7 +88,7 @@
   #loginScreen{ min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--teal-900); }
   .login-card{ background:var(--cream); border-radius:14px; padding:36px 32px; width:100%; max-width:380px; box-shadow:0 10px 40px rgba(0,0,0,.3); }
   .login-card .leaf{ width:48px; height:48px; border-radius:50%; background:var(--gold-500); display:flex; align-items:center; justify-content:center; color:var(--teal-900); font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0 auto 14px; }
-  .login-card h1{ font-size:19px; text-align:center; margin-bottom:6px; }
+  .login-card h1{ font-size:17px; text-align:center; margin-bottom:6px; line-height:1.3; }
   .login-card p.sub{ text-align:center; color:var(--ink-soft); font-size:13.5px; margin-bottom:24px; }
   .login-error{ background:var(--brick-100); color:var(--brick); padding:10px 12px; border-radius:7px; font-size:13px; margin-bottom:14px; display:none; }
   .login-card button.btn{ width:100%; padding:11px; margin-top:6px; }
@@ -100,13 +100,14 @@
   .asist-btn.justificada{ background:var(--gold-100); color:#8a6a1f; }
   #printArea{ display:none; }
   @media print{
-    body *{ visibility:hidden; }
-    #printArea, #printArea *{ visibility:visible; }
-    #printArea{ display:block; position:absolute; top:0; left:0; width:100%; padding:24px; }
+    @page{ margin:12mm; }
+    body > *:not(#printArea){ display:none !important; }
+    #printArea{ display:block !important; position:static !important; width:auto !important; padding:0; }
     #printArea h2{ font-size:20px; margin-bottom:2px; }
     #printArea h3{ font-size:15px; margin:16px 0 6px; }
     #printArea table{ width:100%; border-collapse:collapse; margin-top:6px; }
-    #printArea td, #printArea th{ border:1px solid #999; padding:4px 8px; font-size:12px; }
+    #printArea td, #printArea th{ border:1px solid #999; padding:4px 8px; font-size:12px; box-sizing:border-box; }
+    #printArea tr{ page-break-inside:avoid; break-inside:avoid; }
     #printArea p{ font-size:13px; white-space:pre-wrap; }
   }
 </style>
@@ -117,7 +118,7 @@
 <div id="loginScreen">
   <div class="login-card">
     <div class="leaf">A</div>
-    <h1>Asociación de familiares del CPRPM Naranco</h1>
+    <h1>Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco</h1>
     <p class="sub">Zona privada de la Junta Directiva</p>
     <div id="configWarning">⚠️ Falta configurar la conexión a Supabase. Edita <code>config.js</code> con tu URL y clave "anon".</div>
     <div class="login-error" id="loginError"></div>
@@ -134,7 +135,7 @@
     <div class="brand">
       <div class="leaf">A</div>
       <div>
-        <h1 id="assocName">Asociación de familiares del CPRPM Naranco</h1>
+        <h1 id="assocName">Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco</h1>
         <div class="sub">Gestión de socios, cuotas, incidencias y gastos</div>
       </div>
     </div>
@@ -394,9 +395,10 @@
           <button class="btn" onclick="openIngresoForm()">+ Nuevo ingreso</button>
         </div>
       </div>
+      <p class="muted" style="margin:-8px 0 14px;">Las cuotas de socios marcadas como "Pagado" en la pestaña Cuotas aparecen aquí automáticamente, ya numeradas.</p>
       <div class="cards" id="ingresosResumen" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px;"></div>
       <div class="card"><div class="tablewrap"><table id="tableIngresos">
-        <thead><tr><th>Fecha</th><th>Concepto</th><th>Origen</th><th>Importe (€)</th><th>Documento</th><th></th></tr></thead>
+        <thead><tr><th>Nº</th><th>Fecha</th><th>Concepto</th><th>Origen</th><th>Importe (€)</th><th>Documento</th><th></th></tr></thead>
         <tbody></tbody>
       </table></div></div>
     </section>
@@ -411,7 +413,7 @@
       </div>
       <div class="cards" id="gastosResumen" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px;"></div>
       <div class="card"><div class="tablewrap"><table id="tableGastos">
-        <thead><tr><th>Fecha</th><th>Concepto</th><th>Proveedor</th><th>Importe (€)</th><th>Documento</th><th></th></tr></thead>
+        <thead><tr><th>Nº</th><th>Fecha</th><th>Concepto</th><th>Proveedor</th><th>Importe (€)</th><th>Documento</th><th></th></tr></thead>
         <tbody></tbody>
       </table></div></div>
     </section>
@@ -705,7 +707,7 @@ async function updateCuota(id, patch){
 }
 function reclamarWA(tel, nombre, importe){
   const num = tel.replace(/\D/g,'');
-  const msg = encodeURIComponent(`Hola ${nombre}, te escribimos de Asociación de familiares del CPRPM Naranco para recordarte el pago de la cuota anual de ${anioActual} (${euros(importe)} €). ¡Gracias!`);
+  const msg = encodeURIComponent(`Hola ${nombre}, te escribimos de la Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco para recordarte el pago de la cuota anual de ${anioActual} (${euros(importe)} €). ¡Gracias!`);
   window.open(`https://wa.me/34${num}?text=${msg}`, '_blank');
 }
 
@@ -965,7 +967,7 @@ function imprimirActa(id){
     <tr><td>AC-${prefijo}-${String(i+1).padStart(2,'0')}</td><td>${escapeHtml(ac.descripcion)}</td><td>${escapeHtml(ac.responsable)||'—'}</td><td>${escapeHtml(ac.plazo)||'—'}</td></tr>
   `).join('');
   document.getElementById('printArea').innerHTML = `
-    <h2>Asociación de familiares del CPRPM Naranco</h2>
+    <h2>Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco</h2>
     <p class="muted" style="margin:0 0 12px;">ACTA NÚMERO: ${a.numero} — Estado: ${a.estado}</p>
     <h3>Datos de la sesión</h3>
     <table>
@@ -1098,7 +1100,7 @@ function imprimirConvocatoria(id){
   if(!c) return;
   const destinatarioTexto = c.destinatarios==='junta' ? 'a los miembros de la Junta Directiva' : 'a todos los socios';
   document.getElementById('printArea').innerHTML = `
-    <h2>Asociación de familiares del CPRPM Naranco</h2>
+    <h2>Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco</h2>
     <h3>CONVOCATORIA DE ASAMBLEA ${c.tipo.toUpperCase()}</h3>
     <p>Por acuerdo de la Junta Directiva, se convoca ${destinatarioTexto} a la Asamblea General ${c.tipo} de la Asociación,
     que tendrá lugar el próximo ${fechaLarga(c.fecha)}, en ${escapeHtml(c.lugar)||'[lugar por determinar]'}${c.direccion?', sito en '+escapeHtml(c.direccion):''},
@@ -1141,7 +1143,7 @@ function enviarConvocatoriaWA(convId, socioId){
   const s = socios.find(x=>x.id===socioId);
   if(!c || !s || !s.tel1) return;
   const num = s.tel1.replace(/\D/g,'');
-  const msg = encodeURIComponent(`Hola ${s.nombre}, te escribimos de Asociación de familiares del CPRPM Naranco. Quedas convocado/a a la Asamblea ${c.tipo} que se celebrará el ${fechaLarga(c.fecha)} en ${c.lugar||'lugar por determinar'}, a las ${c.hora_primera||'—'}h en primera convocatoria y ${c.hora_segunda||'—'}h en segunda convocatoria. ¡Gracias!`);
+  const msg = encodeURIComponent(`Hola ${s.nombre}, te escribimos de la Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco. Quedas convocado/a a la Asamblea ${c.tipo} que se celebrará el ${fechaLarga(c.fecha)} en ${c.lugar||'lugar por determinar'}, a las ${c.hora_primera||'—'}h en primera convocatoria y ${c.hora_segunda||'—'}h en segunda convocatoria. ¡Gracias!`);
   window.open(`https://wa.me/34${num}?text=${msg}`, '_blank');
 }
 
@@ -1164,14 +1166,17 @@ function renderIngresos(){
   const body = document.querySelector('#tableIngresos tbody');
   body.innerHTML = ingresos.length ? ingresos.map(g=>`
     <tr>
+      <td>${g.numero?g.numero+'/'+(g.anio||''):'—'}</td>
       <td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.origen)||'—'}</td>
       <td>${euros(g.importe)} €</td><td>${escapeHtml(g.documento)||'—'}</td>
       <td>
+        ${g.origen==='Cuota de socio' ? '<span class="muted">Automático</span>' : `
         <button class="icon-btn" onclick="openIngresoForm('${g.id}')">Editar</button>
         <button class="icon-btn" onclick="deleteIngreso('${g.id}')">Eliminar</button>
+        `}
       </td>
     </tr>
-  `).join('') : `<tr><td colspan="6" class="empty">No hay ingresos registrados.</td></tr>`;
+  `).join('') : `<tr><td colspan="7" class="empty">No hay ingresos registrados.</td></tr>`;
 }
 function openIngresoForm(id){
   const g = id ? ingresos.find(x=>x.id===id) : null;
@@ -1219,15 +1224,15 @@ async function deleteIngreso(id){
 }
 function imprimirIngresosInforme(){
   const filas = ingresos.map(g=>`
-    <tr><td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.origen)||'—'}</td>
+    <tr><td>${g.numero?g.numero+'/'+(g.anio||''):'—'}</td><td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.origen)||'—'}</td>
     <td>${euros(g.importe)} €</td><td>${escapeHtml(g.documento)||'—'}</td></tr>
   `).join('');
   const total = ingresos.reduce((a,g)=>a+Number(g.importe||0),0);
   document.getElementById('printArea').innerHTML = `
     ${cabeceraInforme('Informe de ingresos', `${ingresos.length} ingresos registrados`)}
     <table>
-      <tr><th>Fecha</th><th>Concepto</th><th>Origen</th><th>Importe</th><th>Documento</th></tr>
-      ${filas || '<tr><td colspan="5">Sin resultados.</td></tr>'}
+      <tr><th>Nº</th><th>Fecha</th><th>Concepto</th><th>Origen</th><th>Importe</th><th>Documento</th></tr>
+      ${filas || '<tr><td colspan="6">Sin resultados.</td></tr>'}
     </table>
     <p style="margin-top:10px;"><strong>Total: ${euros(total)} €</strong></p>
   `;
@@ -1253,6 +1258,7 @@ function renderGastos(){
   const body = document.querySelector('#tableGastos tbody');
   body.innerHTML = gastos.length ? gastos.map(g=>`
     <tr>
+      <td>${g.numero?g.numero+'/'+(g.anio||''):'—'}</td>
       <td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.proveedor)||'—'}</td>
       <td>${euros(g.importe)} €</td><td>${escapeHtml(g.documento)||'—'}</td>
       <td>
@@ -1260,7 +1266,7 @@ function renderGastos(){
         <button class="icon-btn" onclick="deleteGasto('${g.id}')">Eliminar</button>
       </td>
     </tr>
-  `).join('') : `<tr><td colspan="6" class="empty">No hay gastos registrados.</td></tr>`;
+  `).join('') : `<tr><td colspan="7" class="empty">No hay gastos registrados.</td></tr>`;
 }
 function openGastoForm(id){
   const g = id ? gastos.find(x=>x.id===id) : null;
@@ -1350,7 +1356,7 @@ async function imprimirRecibo(socioId){
   const anio = document.getElementById('recibo_anio').value;
   const { cuota, total } = await datosRecibo(socioId, anio);
   document.getElementById('printArea').innerHTML = `
-    <h2>Asociación de familiares del CPRPM Naranco</h2>
+    <h2>Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco</h2>
     <p class="muted" style="margin:0 0 14px;">Recibo anual de cuota de socio — Año ${anio}</p>
     <table>
       <tr><td><strong>Socio</strong></td><td>${escapeHtml(s.nombre)}</td><td><strong>NIF</strong></td><td>${escapeHtml(s.nif)||'—'}</td></tr>
@@ -1361,7 +1367,7 @@ async function imprimirRecibo(socioId){
       <tr><th>Importe</th><th>Estado</th><th>Método</th><th>Fecha de pago</th></tr>
       ${cuota ? `<tr><td>${euros(cuota.importe)} €</td><td>${cuota.estado}</td><td>${cuota.metodo||'—'}</td><td>${cuota.fecha_pago||'—'}</td></tr>` : '<tr><td colspan="4">Sin cuota registrada este año.</td></tr>'}
     </table>
-    <p style="margin-top:18px;">Recibí de D./Dña. <strong>${escapeHtml(s.nombre)}</strong> la cantidad de <strong>${euros(total)} €</strong> en concepto de cuota de socio del año ${anio} de la Asociación de familiares del CPRPM Naranco.</p>
+    <p style="margin-top:18px;">Recibí de D./Dña. <strong>${escapeHtml(s.nombre)}</strong> la cantidad de <strong>${euros(total)} €</strong> en concepto de cuota de socio del año ${anio} de la Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco.</p>
     <table style="margin-top:20px;"><tr><td style="width:50%;">Fecha: ${new Date().toLocaleDateString('es-ES')}</td><td style="width:50%;">Fdo.: Tesorero/a de la Asociación<br><br>(Firma y sello)</td></tr></table>
   `;
   window.print();
@@ -1372,7 +1378,7 @@ async function enviarReciboWA(socioId){
   const anio = document.getElementById('recibo_anio').value;
   const { cuota, total } = await datosRecibo(socioId, anio);
   const num = s.tel1.replace(/\D/g,'');
-  const msg = encodeURIComponent(`Hola ${s.nombre}, te escribimos de Asociación de familiares del CPRPM Naranco. Te confirmamos el recibo de tu cuota del año ${anio}: ${cuota?cuota.estado:'Sin registrar'}, ${euros(total)} €. Si necesitas el recibo en PDF, dínoslo. ¡Gracias!`);
+  const msg = encodeURIComponent(`Hola ${s.nombre}, te escribimos de la Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco. Te confirmamos el recibo de tu cuota del año ${anio}: ${cuota?cuota.estado:'Sin registrar'}, ${euros(total)} €. Si necesitas el recibo en PDF, dínoslo. ¡Gracias!`);
   window.open(`https://wa.me/34${num}?text=${msg}`, '_blank');
 }
 async function enviarReciboEmail(socioId){
@@ -1380,8 +1386,8 @@ async function enviarReciboEmail(socioId){
   if(!s || !s.email) return;
   const anio = document.getElementById('recibo_anio').value;
   const { cuota, total } = await datosRecibo(socioId, anio);
-  const asunto = encodeURIComponent(`Recibo cuota de socio ${anio} — Asociación de familiares del CPRPM Naranco`);
-  const cuerpoTexto = `Hola ${s.nombre},\n\nTe confirmamos el recibo de tu cuota de socio del año ${anio}:\n- Estado: ${cuota?cuota.estado:'Sin registrar'}\n- Total: ${euros(total)} €\n\nUn saludo,\nAsociación de familiares del CPRPM Naranco`;
+  const asunto = encodeURIComponent(`Recibo cuota de socio ${anio} — Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco`);
+  const cuerpoTexto = `Hola ${s.nombre},\n\nTe confirmamos el recibo de tu cuota de socio del año ${anio}:\n- Estado: ${cuota?cuota.estado:'Sin registrar'}\n- Total: ${euros(total)} €\n\nUn saludo,\nNueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco`;
   window.location.href = `mailto:${s.email}?subject=${asunto}&body=${encodeURIComponent(cuerpoTexto)}`;
 }
 
@@ -1392,14 +1398,12 @@ async function renderPanel(){
   const { data: incAbiertas } = await db.from('incidencias').select('id').neq('estado','Cerrada');
   const { data: gastosData } = await db.from('gastos').select('importe');
   const { data: ingresosData } = await db.from('ingresos').select('importe');
-  const { data: cuotasPagadasHist } = await db.from('cuotas').select('importe').eq('estado','Pagado');
   const pagadas = (cuotasMes||[]).filter(c=>c.estado==='Pagado').length;
   const pendientes = (cuotasMes||[]).filter(c=>c.estado==='Pendiente').length;
   const lpdPendiente = socios.filter(s=>!s.lpd).length;
   const totalGastos = (gastosData||[]).reduce((a,g)=>a+Number(g.importe||0),0);
   const totalIngresos = (ingresosData||[]).reduce((a,g)=>a+Number(g.importe||0),0);
-  const totalCuotasPagadas = (cuotasPagadasHist||[]).reduce((a,c)=>a+Number(c.importe||0),0);
-  const saldo = totalCuotasPagadas + totalIngresos - totalGastos;
+  const saldo = totalIngresos - totalGastos;
   document.getElementById('panelCards').innerHTML = `
     <div class="metric"><div class="label">Total socios</div><div class="value">${socios.length}</div></div>
     <div class="metric ok"><div class="label">Cuotas pagadas (año)</div><div class="value">${pagadas}</div></div>
@@ -1412,7 +1416,7 @@ async function renderPanel(){
 
 // ---------- INFORMES DE IMPRESIÓN ----------
 function cabeceraInforme(titulo, subtitulo){
-  return `<h2>Asociación de familiares del CPRPM Naranco</h2>
+  return `<h2>Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco</h2>
     <p class="muted" style="margin:0 0 4px;">${titulo}</p>
     <p class="muted" style="margin:0 0 14px;">${subtitulo||''} — generado el ${new Date().toLocaleDateString('es-ES')}</p>`;
 }
@@ -1430,7 +1434,7 @@ function imprimirJuntaDirectiva(){
     </tr>
   `).join('');
   document.getElementById('printArea').innerHTML = `
-    <h2>Asociación de familiares del CPRPM Naranco</h2>
+    <h2>Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco</h2>
     <p class="muted" style="margin:0 0 14px;">Composición de la Junta Directiva</p>
     <table>
       <tr><th>Cargo</th><th>Nombre y apellidos</th><th>NIF</th><th>Teléfono</th><th>Email</th></tr>
@@ -1511,15 +1515,15 @@ function imprimirIndiceActas(){
 }
 function imprimirGastosInforme(){
   const filas = gastos.map(g=>`
-    <tr><td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.proveedor)||'—'}</td>
+    <tr><td>${g.numero?g.numero+'/'+(g.anio||''):'—'}</td><td>${g.fecha}</td><td>${escapeHtml(g.concepto)}</td><td>${escapeHtml(g.proveedor)||'—'}</td>
     <td>${euros(g.importe)} €</td><td>${escapeHtml(g.documento)||'—'}</td></tr>
   `).join('');
   const total = gastos.reduce((a,g)=>a+Number(g.importe||0),0);
   document.getElementById('printArea').innerHTML = `
     ${cabeceraInforme('Informe de gastos', `${gastos.length} gastos registrados`)}
     <table>
-      <tr><th>Fecha</th><th>Concepto</th><th>Proveedor</th><th>Importe</th><th>Documento</th></tr>
-      ${filas || '<tr><td colspan="5">Sin resultados.</td></tr>'}
+      <tr><th>Nº</th><th>Fecha</th><th>Concepto</th><th>Proveedor</th><th>Importe</th><th>Documento</th></tr>
+      ${filas || '<tr><td colspan="6">Sin resultados.</td></tr>'}
     </table>
     <p style="margin-top:10px;"><strong>Total: ${euros(total)} €</strong></p>
   `;
