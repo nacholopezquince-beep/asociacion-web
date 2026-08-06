@@ -1102,15 +1102,17 @@ function fechaLarga(fecha){
 function imprimirConvocatoria(id){
   const c = convocatorias.find(x=>x.id===id);
   if(!c) return;
-  const destinatarioTexto = c.destinatarios==='junta' ? 'a los miembros de la Junta Directiva' : 'a todos los socios';
   const tipoReunionTexto = c.destinatarios==='junta'
     ? `reunión ${c.tipo.toLowerCase()} de la Junta Directiva`
     : `Asamblea General ${c.tipo} de la Asociación`;
+  const subtitulo = c.destinatarios==='junta'
+    ? `CONVOCATORIA ${c.tipo.toUpperCase()} DE JUNTA DIRECTIVA`
+    : `CONVOCATORIA DE ASAMBLEA ${c.tipo.toUpperCase()}`;
   const nombreSecretario = escapeHtml(c.secretario) || '_______________________';
   document.getElementById('printArea').innerHTML = `
     <h2>Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco</h2>
-    <h3>CONVOCATORIA DE ASAMBLEA ${c.tipo.toUpperCase()}</h3>
-    <p>Don ${nombreSecretario}, como Secretario de la Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco, convoca, por orden del Presidente, ${tipoReunionTexto}, con la presencia de ${destinatarioTexto}.</p>
+    <h3>${subtitulo}</h3>
+    <p>Don ${nombreSecretario}, como Secretario de la Nueva Asociación de Familiares del Centro Polivalente de Recursos Personas Mayores Naranco, convoca, por orden del Presidente, ${tipoReunionTexto}.</p>
     <p>La reunión tendrá lugar el próximo ${fechaLarga(c.fecha)}, en ${escapeHtml(c.lugar)||'[lugar por determinar]'}${c.direccion?', sito en '+escapeHtml(c.direccion):''},
     a las ${c.hora_primera||'[hora]'} horas en primera convocatoria, y a las ${c.hora_segunda||'[hora]'} horas en segunda convocatoria, con el siguiente:</p>
     <h3>ORDEN DEL DÍA</h3>
