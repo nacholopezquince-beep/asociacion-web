@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1150,7 +1151,7 @@ function enviarConvocatoriaWA(convId, socioId){
 // ---------- INGRESOS ----------
 let ingresos = [];
 async function cargarIngresos(){
-  const { data, error } = await db.from('ingresos').select('*').order('fecha', {ascending:false});
+  const { data, error } = await db.from('ingresos').select('*').order('numero', {ascending:true});
   if(error){ showToast('Error cargando ingresos: '+error.message); return; }
   ingresos = data;
   renderIngresos();
@@ -1242,7 +1243,7 @@ function imprimirIngresosInforme(){
 // ---------- GASTOS ----------
 let gastos = [];
 async function cargarGastos(){
-  const { data, error } = await db.from('gastos').select('*').order('fecha', {ascending:false});
+  const { data, error } = await db.from('gastos').select('*').order('numero', {ascending:true});
   if(error){ showToast('Error cargando gastos: '+error.message); return; }
   gastos = data;
   renderGastos();
